@@ -60,4 +60,4 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 .sidebar-compact .lesson-number{border:0;min-width:0;min-height:0}
 .sidebar-compact .course-sidebar .lesson-nav{gap:.4rem}
 @media(max-width:480px){.app-header{gap:.25rem;padding:.35rem}.app-header h1{font-size:.7rem}.app-header .player{gap:.15rem}.course-layout{gap:.3rem}}
-::highlight(spoken-word){text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:currentColor;text-decoration-thickness:.12em;text-underline-offset:.18em;background-color:#e8c76a;color:#171a20}
+::highlight(spoken-word){text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:currentColor;text-decoration-thickness:.12em;text-underline-offset:.18em}
