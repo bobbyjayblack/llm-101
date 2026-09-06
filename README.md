@@ -32,6 +32,10 @@ Claire uses a soft, rounded, velvety tone with a subtle whimsical lilt at a stea
 
 Playback now defaults to **1.3×**. Existing settings receive this change once on reload; subsequent manual speed choices remain saved. Local playback preserves pitch and reuses the same voice recordings.
 
+**Spoken words are underlined** in the lesson and visible practice text. A local Wav2Vec2 speech model aligns the text to each recording; the player follows those saved timings using the audio clock, including after speed changes and pause/resume. Connected words advance smoothly; longer silences clear the underline. Stop, replay, lesson changes, and narrator changes clear stale highlighting. The voice and recordings are unchanged.
+
+Setup downloads the pinned alignment model (approximately 360 MB); alignment runs on the CPU and its files are cached in `.audio/timings/`. The background course renderer prepares these alongside the WAVs, and **Prepare lesson audio** also prepares word timings for the chosen narrator. For uncached text, playback can begin before alignment finishes; underlining joins when timings arrive. Missing timings do not delay or prevent audio playback. Acoustic boundaries are estimates, especially for numbers, acronyms, and unusual pronunciations.
+
 Qwen3-TTS-12Hz-1.7B-VoiceDesign creates short reference recordings during setup. The companion 1.7B-Base model reuses those references for a consistent narrator. Only the Base model remains loaded during ordinary use. Both run through the official `qwen-tts` package with CUDA PyTorch and Windows-compatible SDPA attention. Model revisions are pinned in `audio_service.py`.
 
 Claire's lesson narration is pre-rendered automatically in batches of up to four segments. The current unit contains 127 unique segments: all 84 lesson-reading segments first, followed by static questions, feedback, self-check material, and preview text. Progress appears under the player status. Once saved, a segment is served immediately from disk, bypassing the model's generation queue even when the GPU is busy. The player fetches the following segment ahead of time. Passage highlighting and pitch-preserving speed control remain available.
@@ -52,6 +56,8 @@ Run `npm test` for content, playback-state, and HTTP-boundary tests, and `.venv\
 
 After preparing lesson 1, run `node checks/playback-latency.mjs` to measure actual browser playback onset and segment transitions at 1.3x, and verify speed migration and preference persistence. `node checks/verify-prerender.mjs` checks every planned recording through the live speech endpoint once preparation is complete.
 
+Run `.venv\Scripts\python.exe -m unittest alignment_test` for alignment-path and number/punctuation handling checks. After course preparation, `node checks/verify-word-timings.mjs` checks word coverage, timestamp ordering, recording bounds, and response times for every course clip.
+
 ## Project files
 
 - `index.html` and `style.css`: accessible course interface and themes.
@@ -62,6 +68,7 @@ After preparing lesson 1, run `node checks/playback-latency.mjs` to measure actu
 - `audio_service.py`, `voices.json`, and `requirements-audio.txt`: local Qwen speech generation, narrator definitions, and Python dependencies.
 - `setup-audio.ps1`: installs the audio runtime, downloads models, and creates narrator references.
 - `audio-plan.js` and `prerender-audio.mjs`: exact player-text inventory and resumable course renderer.
+- `alignment.py`: offline word alignment and cached timing metadata.
 - `start.bat`, `stop.bat`, and `service.ps1`: Windows background service controls.
 - [COURSE-DESIGN.md](COURSE-DESIGN.md): broader curriculum and accessibility goals.
 - [VERIFICATION.md](VERIFICATION.md): recorded checks and remaining validation.
@@ -69,7 +76,7 @@ After preparing lesson 1, run `node checks/playback-latency.mjs` to measure actu
 
 ## Narration and access
 
-Choose Reading & audio settings to adjust text, theme, rate, audio source, and voice. Read lesson starts from the saved passage. Highlighting is passage-level, not word-level. Each passage has its own replay entry point. Automatic scrolling is off by default. Local narration uses normal browser audio playback; the browser-voice fallback requires speech synthesis and an available voice. Actual voice comfort and pronunciation should be evaluated on the learner's device.
+Choose Reading & audio settings to adjust text, theme, rate, audio source, and voice. Read lesson starts from the saved passage. The active passage remains highlighted while the current spoken word receives a contrasting underline. Each passage has its own replay entry point. Automatic scrolling is off by default. Word styling uses the CSS Custom Highlight API without changing the text or adding screen-reader announcements. Older browsers retain passage highlighting. Browser voices underline words only when the voice provides word-boundary events; local recordings use the cached acoustic timings. Actual voice comfort and pronunciation should be evaluated on the learner's device.
 
 Tab navigates controls. All content is available without audio. Use operating-system dictation in the notes field if preferred. No microphone, gaze tracking, camera, API credential, or conversational AI integration is included. Quizzes use authored feedback; open explanations are self-assessed with criteria. This is the first sample unit, not a completed professor-replacement course.
 

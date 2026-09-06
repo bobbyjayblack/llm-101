@@ -21,12 +21,43 @@ function playbackControls(){
   const label=paused?'Resume':'Pause';$('pause').setAttribute('aria-label',label);$('pause').title=label;$('pause').firstElementChild.textContent=paused?'▶':'⏸';
 }
 function status(text){$('audio-status').textContent=text;playbackControls();}
-function halt(){generation++;synth?.cancel();localNarration.stop();preparation?.abort();preparation=null;$('prepare-lesson').textContent='Prepare lesson audio';speaking=false;paused=false;utterance=null;playbackControls();}
+function clearWord(){globalThis.CSS?.highlights?.delete('spoken-word');}
+function underline(element,start,end){
+  clearWord();if(!element||!globalThis.CSS?.highlights||!globalThis.Highlight)return;
+  const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);const range=new Range();let node,offset=0,started=false;
+  while((node=walker.nextNode())){
+    const next=offset+node.length;
+    if(!started&&start<next){range.setStart(node,Math.max(0,start-offset));started=true;}
+    if(started&&end<=next){range.setEnd(node,end-offset);CSS.highlights.set('spoken-word',new Highlight(range));return;}
+    offset=next;
+  }
+}
+function showWord(entry,index){
+  clearWord();if(index===null)return;
+  const word=[...entry.text.matchAll(/\S+/gu)][index];if(!word)return;
+  const start=entry.offset+word.index,end=start+word[0].length;
+  const target=entry.targets.find(item=>start>=item.start&&end<=item.start+item.element.textContent.length);
+  if(target)underline(target.element,start-target.start,end-target.start);
+}
+function readingEntries(text,elements,label,passage){
+  let cursor=0;const targets=elements.filter(Boolean).map(element=>{
+    const start=text.indexOf(element.textContent,cursor);if(start>=0)cursor=start+element.textContent.length;
+    return {element,start};
+  }).filter(item=>item.start>=0);
+  cursor=0;
+  return speechParts(text).map(part=>{const offset=text.indexOf(part,cursor);cursor=offset+part.length;return {text:part,offset,targets,label,passage};});
+}
+function browserBoundary(text,targets,event){
+  if(event.name!=='word')return;
+  const index=[...text.matchAll(/\S+/gu)].findIndex(word=>event.charIndex>=word.index&&event.charIndex<word.index+word[0].length);
+  if(index>=0)showWord({text,targets,offset:0},index);
+}
+function halt(){generation++;synth?.cancel();localNarration.stop();clearWord();preparation?.abort();preparation=null;$('prepare-lesson').textContent='Prepare lesson audio';speaking=false;paused=false;utterance=null;playbackControls();}
 function highlight(){document.querySelectorAll('.passage').forEach((p,i)=>p.classList.toggle('active',i===current));state.passage=current;save();}
 function read(index=current,single=false){
   if(state.engine==='local'){
     const paragraphs=lessons[state.lesson].paragraphs;const entries=[];
-    for(let i=index;i<(single?index+1:paragraphs.length);i++)for(const text of speechParts(paragraphs[i]))entries.push({text,passage:i,label:`Reading passage ${i+1} of ${paragraphs.length}.`});
+    for(let i=index;i<(single?index+1:paragraphs.length);i++)entries.push(...readingEntries(paragraphs[i],[document.querySelectorAll('.passage p')[i]],`Reading passage ${i+1} of ${paragraphs.length}.`,i));
     readLocal(entries,single?'Passage replay finished.':'Lesson narration finished. Continue to the practice below.');return;
   }
   if(!synth){status('Narration is unavailable in this browser. Try opening this course in Edge or Chrome.');return;}
@@ -37,9 +68,10 @@ function read(index=current,single=false){
     if(state.follow)document.querySelectorAll('.passage')[current]?.scrollIntoView({block:'center',behavior:'instant'});
     utterance=new SpeechSynthesisUtterance(lessons[state.lesson].paragraphs[current]);
     utterance.rate=Number(state.rate);utterance.voice=voices.find(v=>v.voiceURI===state.voice)||null;
+    utterance.onboundary=event=>{if(token===generation)browserBoundary(utterance.text,[{element:document.querySelectorAll('.passage p')[current],start:0}],event);};
     utterance.onstart=()=>{if(token===generation)status(`Reading passage ${current+1} of ${lessons[state.lesson].paragraphs.length}.`);};
-    utterance.onend=()=>{if(token!==generation)return;if(!single&&current+1<lessons[state.lesson].paragraphs.length){current++;passage();}else{speaking=false;status(single?'Passage replay finished.':'Lesson narration finished. Continue to the practice below.');}};
-    utterance.onerror=e=>{if(token!==generation)return;speaking=false;status(`Narration could not continue (${e.error}). Try another voice or browser; your text and notes remain available.`);};
+    utterance.onend=()=>{if(token!==generation)return;clearWord();if(!single&&current+1<lessons[state.lesson].paragraphs.length){current++;passage();}else{speaking=false;status(single?'Passage replay finished.':'Lesson narration finished. Continue to the practice below.');}};
+    utterance.onerror=e=>{if(token!==generation)return;clearWord();speaking=false;status(`Narration could not continue (${e.error}). Try another voice or browser; your text and notes remain available.`);};
     synth.speak(utterance);
   }passage();
 }
@@ -66,31 +98,34 @@ function render(focus=false){
   $('progress').textContent=`${Object.keys(state.reviewed).length} of ${lessons.length} lessons marked reviewed. Your place and notes save automatically on this browser.`;
   const stamps=Object.values(state.reviewed).map(Number).filter(Number.isFinite);
   $('review').textContent=stamps.length?`Next suggested recall session: ${new Date(Math.max(...stamps)+3*86400000).toLocaleDateString()}. Explain first, then consult your notes.`:'After reviewing a lesson, return in about three days for a recall session.';
-  highlight();status(`Ready at passage ${current+1}. Highlighting follows the spoken passage.`);save();if(focus){$('lesson').focus({preventScroll:true});$('lesson').scrollIntoView({block:'start'});}
+  highlight();status(`Ready at passage ${current+1}. Underlining follows the spoken words.`);save();if(focus){$('lesson').focus({preventScroll:true});$('lesson').scrollIntoView({block:'start'});}
 }
-function readExtra(text){
-  if(state.engine==='local'){readLocal(speechParts(text).map(part=>({text:part,label:'Reading practice material.'})),'Practice narration finished.');return;}
+function readExtra(text,elements=[]){
+  const entries=readingEntries(text,elements,'Reading practice material.');
+  if(state.engine==='local'){readLocal(entries,'Practice narration finished.');return;}
   if(!synth){status('Narration is unavailable in this browser.');return;}
   halt();const token=generation;speaking=true;playbackControls();utterance=new SpeechSynthesisUtterance(text);utterance.rate=Number(state.rate);utterance.voice=voices.find(v=>v.voiceURI===state.voice)||null;
   utterance.onstart=()=>{if(token===generation)status('Reading practice material.');};
-  utterance.onend=()=>{if(token===generation){speaking=false;status('Practice narration finished.');}};
-  utterance.onerror=()=>{if(token===generation){speaking=false;status('Unable to read practice material. Try another voice.');}};synth.speak(utterance);
+  utterance.onboundary=event=>{if(token===generation)browserBoundary(text,entries[0]?.targets||[],event);};
+  utterance.onend=()=>{if(token===generation){clearWord();speaking=false;status('Practice narration finished.');}};
+  utterance.onerror=()=>{if(token===generation){clearWord();speaking=false;status('Unable to read practice material. Try another voice.');}};synth.speak(utterance);
 }
 function readLocal(entries,finished){
   halt();if(!entries.length)return;speaking=true;playbackControls();const token=generation;
   localNarration.play(entries,{
     voice:state.localVoice,rate:Number(state.rate),
     onEntry:entry=>{if(token!==generation)return;if(entry.passage!==undefined){current=entry.passage;highlight();if(state.follow)document.querySelectorAll('.passage')[current]?.scrollIntoView({block:'center',behavior:'instant'});}},
+    onWord:(entry,index)=>{if(token===generation)showWord(entry,index);},
     onStatus:text=>{if(token===generation)status(paused?'Paused. Select Resume to continue.':text);},
     onEnd:()=>{if(token===generation){speaking=false;paused=false;status(finished);}},
     onError:message=>{if(token===generation){speaking=false;paused=false;status(message);}},
   });
 }
-$('read-question').onclick=()=>{const l=lessons[state.lesson];readExtra(l.question+' '+l.options.map((s,i)=>`Choice ${i+1}. ${s}`).join(' '));};
-$('read-feedback').onclick=()=>readExtra($('feedback').textContent||'Choose an answer and select Check answer first.');
-$('read-prompt').onclick=()=>readExtra(lessons[state.lesson].prompt);
-$('read-criteria').onclick=()=>readExtra(lessons[state.lesson].rubric);
-$('read-result').onclick=()=>readExtra($('result').textContent);
+$('read-question').onclick=()=>{const l=lessons[state.lesson];readExtra(l.question+' '+l.options.map((s,i)=>`Choice ${i+1}. ${s}`).join(' '),[$('question'),...document.querySelectorAll('#choices label')]);};
+$('read-feedback').onclick=()=>readExtra($('feedback').textContent||'Choose an answer and select Check answer first.',[$('feedback')]);
+$('read-prompt').onclick=()=>readExtra(lessons[state.lesson].prompt,[$('prompt')]);
+$('read-criteria').onclick=()=>{$('rubric').closest('details').open=true;readExtra(lessons[state.lesson].rubric,[$('rubric')]);};
+$('read-result').onclick=()=>readExtra($('result').textContent,[$('result')]);
 $('play').onclick=()=>read();$('replay').onclick=()=>read(current,true);$('stop').onclick=()=>{halt();status('Stopped. Read lesson resumes from this passage.');};
 $('pause').onclick=async()=>{if(!speaking)return;paused=!paused;try{if(state.engine==='local')await localNarration.setPaused(paused);else if(paused)synth.pause();else synth.resume();status(paused?'Paused. Select Resume to continue.':'Narration resumed.');}catch{halt();status('Playback could not resume. Select Play to try again.');}};
 $('restart').onclick=()=>read(0);
@@ -154,6 +189,7 @@ $('prepare-lesson').onclick=async()=>{
     for(let i=0;i<texts.length;i++){
       status(`Preparing lesson audio: ${i+1} of ${texts.length} segments. You can keep reading or cancel.`);
       await localNarration.fetchAudio(texts[i],state.localVoice,controller.signal);
+      await localNarration.fetchTimings(texts[i],state.localVoice,controller.signal);
       controller.signal.throwIfAborted();
     }
     status('Lesson audio is saved and ready. Select Play to listen.');

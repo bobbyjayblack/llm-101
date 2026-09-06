@@ -19,7 +19,7 @@ LLM 101 is an audio-first introductory AI course implemented with plain HTML, CS
 ## Accessibility and learner data
 
 - Preserve complete text alternatives, keyboard operation, visible focus, labeled controls, large text, contrast settings, and user-controlled audio.
-- Narration highlights whole passages. Do not claim word-level synchronization or verified audible quality from browser events alone.
+- Local narration underlines words using cached acoustic timings and the audio clock. Preserve pause/stop/cancellation behavior, segment-to-text offsets, and the passage fallback when timings or browser support are unavailable. Do not claim phonetic accuracy or audible quality from browser events alone.
 - Keep progress and notes compatible with the existing localStorage state. Avoid changes that silently erase learner data.
 - Do not introduce paid integrations, credentials, microphone/camera collection, or tracking without an explicit task requirement.
 - Keep authored quiz feedback and self-reviewed progress clearly distinguished from AI assessment.
@@ -27,7 +27,7 @@ LLM 101 is an audio-first introductory AI course implemented with plain HTML, CS
 ## Verification and documentation
 
 - Run the existing tests for code or content changes; add focused tests when behavior warrants them.
-- Run `.venv\Scripts\python.exe -m unittest audio_service_test` for backend validation. `checks/audio-smoke.py` and `npm run test:browser` exercise real local speech with both services running; browser checks require `npm ci` and Chrome.
+- Run `.venv\Scripts\python.exe -m unittest audio_service_test alignment_test` for backend validation. `checks/audio-smoke.py` and `npm run test:browser` exercise real local speech with both services running; browser checks require `npm ci` and Chrome. `node checks/verify-word-timings.mjs` validates the complete saved course timing inventory.
 - For interface changes, check navigation, keyboard focus, large text, theme settings, narration controls, and progress persistence as relevant.
 - Update README.md when setup or behavior changes. Record actual verification and remaining limitations in VERIFICATION.md; do not claim checks that were not performed.
 - Preserve the custom noncommercial terms in LICENSE.md and describe the project as source-available. Do not replace them with a license permitting commercial exploitation unless the owner explicitly requests a licensing change.

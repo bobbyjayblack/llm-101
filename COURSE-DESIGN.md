@@ -1,6 +1,6 @@
 # Generative AI Systems: course design draft
 
-Status: Unit 1 is implemented as a local browser app with six introductory lessons, passage-synchronized Qwen3-TTS narration with three original synthetic voices, an optional browser-voice fallback, an experiment, authored quiz feedback, notes, and self-review criteria. Windows launchers manage the web and audio services together. The complete course and conversational voice tutor are still future work. See README.md for launch instructions and saved learner preferences.
+Status: Unit 1 is implemented as a local browser app with six introductory lessons, Qwen3-TTS narration with passage highlighting and timed word underlining, three original synthetic voices, an optional browser-voice fallback, an experiment, authored quiz feedback, notes, and self-review criteria. Windows launchers manage the web and audio services together. The complete course and conversational voice tutor are still future work. See README.md for launch instructions and saved learner preferences.
 
 Confirmed direction: deep understanding and comparison; 3–5 hours weekly; large synchronized text and audio; magnification; spoken discussion and keyboard coding; Python refresher and mathematics as needed. VSR means Video Super-Resolution, with specialization depth to be chosen after the introduction. The inspected Windows computer has approximately 64 GB RAM and an RTX 4090. Optional services budget is up to $100 monthly; no spending has been authorized or incurred. Eye tracking is deferred.
 

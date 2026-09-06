@@ -26,7 +26,7 @@ export function createCourseServer(){
         return json(res,200,health);
       }catch{return json(res,200,{status:'offline'});}
     }
-    if(route==='/api/audio/speech'&&req.method==='POST'){
+    if(['/api/audio/speech','/api/audio/timings'].includes(route)&&req.method==='POST'){
       if(req.headers.origin&&!['http://127.0.0.1:4173','http://localhost:4173'].includes(req.headers.origin))return json(res,403,{error:'Origin is not allowed.'});
       if(req.headers['content-type']?.split(';')[0]!=='application/json')return json(res,415,{error:'Use application/json.'});
       const controller=new AbortController();
@@ -39,7 +39,7 @@ export function createCourseServer(){
         const check=await fetch('http://127.0.0.1:4174/health',{signal:controller.signal});
         const health=await check.json();
         if(health.service!=='llm101-audio'||health.appId!==appId)throw new Error('Different audio service');
-        const response=await fetch('http://127.0.0.1:4174/speech',{method:'POST',headers:{'Content-Type':'application/json'},body,signal:controller.signal});
+        const response=await fetch('http://127.0.0.1:4174/'+route.split('/').at(-1),{method:'POST',headers:{'Content-Type':'application/json'},body,signal:controller.signal});
         const data=Buffer.from(await response.arrayBuffer());
         if(!res.destroyed){res.writeHead(response.status,{'Content-Type':response.headers.get('content-type')||'application/json','Cache-Control':'no-store','X-Audio-Cache':response.headers.get('x-audio-cache')||''});res.end(data);}
       }catch{

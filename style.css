@@ -54,8 +54,10 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 .sidebar-compact .course-sidebar .panel{padding:.2rem;margin-bottom:.4rem}
 .sidebar-compact .lesson-label,.sidebar-compact .toggle-label,.sidebar-compact #current-lesson,.sidebar-compact #sidebar-details h2{display:none}
 .sidebar-compact #audio-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.sidebar-compact #prepared-audio-status{display:none}
 .sidebar-compact #toggle-sidebar{font-size:1.2rem;margin:0;padding:.2rem;min-height:48px}
 .sidebar-compact .course-sidebar .lesson-nav button{justify-content:center;min-width:48px;padding:.15rem;gap:0}
 .sidebar-compact .lesson-number{border:0;min-width:0;min-height:0}
 .sidebar-compact .course-sidebar .lesson-nav{gap:.4rem}
 @media(max-width:480px){.app-header{gap:.25rem;padding:.35rem}.app-header h1{font-size:.7rem}.app-header .player{gap:.15rem}.course-layout{gap:.3rem}}
+::highlight(spoken-word){text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:currentColor;text-decoration-thickness:.12em;text-underline-offset:.18em;background-color:#e8c76a;color:#171a20}

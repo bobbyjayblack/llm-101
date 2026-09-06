@@ -2,6 +2,16 @@
 
 Checked on 2026-09-06.
 
+## Word underlining
+
+- Prepared acoustic timings for all 127 saved Claire clips: 2,919 words. The complete timing-endpoint sweep verified coverage, ordered non-overlapping intervals, and bounds within each recording. Responses had a median of 16 ms and maximum of 32 ms.
+- Real in-app browser playback at 1.3x produced 224 timing observations across two consecutive audio segments with no mismatches between the visible word and saved timestamps (excluding observations within 45 ms of a boundary). Pause retained the same word and audio position; a live change to 1.5x continued underlining. Dark 24 px and light 36 px screenshots were inspected. Practice question underlining and clearing on Stop also passed; reading settings were restored to 1.3x, 24 px, dark, and automatic following off.
+- Word styling uses native text ranges, preserving the text, radio controls, and screen-reader structure. Tiny speech gaps retain the preceding underline to avoid flicker; longer pauses clear it. Audio starts independently of timing preparation.
+- A final real-browser onset measurement was 49 ms from the player starting the request to the audio `playing` event. Reload removed temporary test instrumentation; no browser errors or horizontal page overflow were observed.
+- Ten Node tests and nine Python tests passed, including timing cancellation, pause/rate behavior, repeated CTC letters, punctuation/numbers, and serving saved timings without a loaded model.
+
+Limitations: acoustic timing is estimated rather than manually annotated. Browser checks establish agreement with those timings, not phonetic ground truth for every word. Browser-voice timing depends on boundary-event support. A newly generated clip may begin playing before its word timings are ready; saved Claire course clips are fully prepared.
+
 ## 1.3x playback and pre-rendering
 
 The current default and one-time existing-settings migration are 1.3x. A separate headless Chrome context verified migration from the previous 1.5x setting, note preservation, and persistence of a subsequent manual speed choice.

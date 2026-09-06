@@ -5,11 +5,28 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 import urllib.request
+import json
 from http.server import ThreadingHTTPServer
 from audio_service import validate_request, validate_batch, VOICES, voice_version, audio_digest, Handler
 
 
 class RequestTests(unittest.TestCase):
+    def test_saved_timings_bypass_alignment_and_model_loading(self):
+        timings = {'words': [{'index': 0, 'start': .1, 'end': .7}], 'duration': 1}
+        with patch('audio_service.saved_timings', return_value=timings):
+            server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+            server.narrator = SimpleNamespace(status='loading')
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                request = urllib.request.Request(f'http://127.0.0.1:{server.server_port}/timings',
+                    data=json.dumps({'text': 'Hello', 'voice': 'claire'}).encode(),
+                    headers={'Host': '127.0.0.1:4174', 'Content-Type': 'application/json'})
+                with urllib.request.urlopen(request, timeout=2) as response:
+                    self.assertEqual(json.load(response), timings)
+            finally:
+                server.shutdown(); server.server_close(); thread.join()
+
     def test_valid_text_and_voice(self):
         self.assertEqual(validate_request({'text': '  A model\n learns. ', 'voice': 'claire'}), ('A model learns.', 'claire'))
 

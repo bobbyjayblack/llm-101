@@ -15,7 +15,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Model download or voice preparation failed.' }
     $logDirectory = Join-Path $PSScriptRoot '.service'
     New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
-    $signature = (Get-FileHash (Join-Path $PSScriptRoot 'requirements-audio.txt')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'voices.json')).Hash
+    $signature = (Get-FileHash (Join-Path $PSScriptRoot 'requirements-audio.txt')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'voices.json')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'alignment.py')).Hash
     Set-Content -LiteralPath (Join-Path $logDirectory 'audio-setup.txt') -Value $signature
     Write-Host 'Local audio setup complete.'
 } catch {

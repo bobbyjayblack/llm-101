@@ -77,7 +77,7 @@ try {
     $audioServers = @(Find-Servers 'python.exe' $audioPattern)
     if ($webServers.Count -eq 0) { Assert-FreePort 4173 }
     if ($audioServers.Count -eq 0) { Assert-FreePort 4174 }
-    $signature = (Get-FileHash (Join-Path $PSScriptRoot 'requirements-audio.txt')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'voices.json')).Hash
+    $signature = (Get-FileHash (Join-Path $PSScriptRoot 'requirements-audio.txt')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'voices.json')).Hash + (Get-FileHash (Join-Path $PSScriptRoot 'alignment.py')).Hash
     $marker = Join-Path $logDirectory 'audio-setup.txt'
     $prepared = (Test-Path -LiteralPath $python) -and (Test-Path -LiteralPath $marker)
     if ($prepared) { $prepared = ((Get-Content -LiteralPath $marker -Raw).Trim() -eq $signature) }

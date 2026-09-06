@@ -59,3 +59,31 @@ test('pause during preparation, rate changes, and end progression',async t=>{
   assert.equal(player.audio.plays,2);player.audio.onended();await run;
   assert.equal(ended,true);
 });
+
+test('word tracking follows audio time across pause, speed changes, silence, and stop',async t=>{
+  let frame;
+  globalThis.requestAnimationFrame=callback=>{frame=callback;return 1;};
+  globalThis.cancelAnimationFrame=()=>{frame=null;};
+  t.after(()=>{delete globalThis.requestAnimationFrame;delete globalThis.cancelAnimationFrame;});
+  const player=new LocalNarration(new FakeAudio()),seen=[];
+  player.audio.currentTime=0;
+  player.trackWords([{index:0,start:.2,end:.5},{index:1,start:.6,end:1.2}],word=>seen.push(word));
+  frame();assert.equal(seen.at(-1),null);
+  player.audio.currentTime=.3;frame();assert.equal(seen.at(-1),0);
+  await player.setPaused(true);const count=seen.length;frame();assert.equal(seen.length,count);
+  player.setRate(1.5);frame();assert.equal(seen.length,count,'rate changes do not advance the audio clock');
+  player.audio.currentTime=.55;frame();assert.equal(seen.at(-1),null);
+  player.audio.currentTime=.9;player.audio.ontimeupdate();assert.equal(seen.at(-1),1);
+  player.stop();assert.equal(seen.at(-1),null);assert.equal(frame,null);assert.equal(player.audio.ontimeupdate,null);
+});
+
+test('slow word timings never delay playback or highlight a stopped passage',async t=>{
+  const timings=deferred(),ready=deferred();let words=0;
+  const player=new LocalNarration(new FakeAudio());
+  t.mock.method(player,'fetchAudio',async()=>new Blob(['wave']));
+  t.mock.method(player,'fetchTimings',()=>timings.promise);
+  const run=player.play([{text:'Saved audio',label:'Reading'}],callbacks({onEntry:()=>ready.resolve(),onWord:()=>words++}));
+  await ready.promise;assert.equal(player.audio.plays,1,'play starts before timings arrive');
+  player.stop();timings.resolve([{index:0,start:0,end:1}]);await run;await tick();
+  assert.equal(words,0,'late timings cannot revive highlighting');
+});

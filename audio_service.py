@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from alignment import WordAligner, saved_timings, prepare as prepare_alignment
 
 ROOT = Path(__file__).resolve().parent
 MODEL_DIR = ROOT / '.models'
@@ -103,6 +104,7 @@ def write_audio(path, samples, sample_rate):
 def prepare():
     import torch
     from huggingface_hub import snapshot_download
+    prepare_alignment()
     for name, (repo, revision) in MODELS.items():
         log.info('Downloading/verifying %s', repo)
         snapshot_download(repo, revision=revision, local_dir=str(MODEL_DIR / name),
@@ -135,6 +137,8 @@ class Narrator:
         self.lock = threading.Lock()
         # One generation and one look-ahead request; never an unbounded GPU queue.
         self.slots = threading.BoundedSemaphore(2)
+        self.aligner = WordAligner()
+        self.alignment_slots = threading.BoundedSemaphore(2)
 
     def load(self):
         try:
@@ -214,7 +218,9 @@ class Narrator:
                     raise RuntimeError('The model did not return every requested segment.')
                 for text, samples in zip(missing, wavs):
                     write_audio(AUDIO_DIR / 'course' / f'{audio_digest(text, voice)}.wav', samples, sr)
-            return {'prepared': len(texts), 'generated': len(missing)}
+        for text in dict.fromkeys(texts):
+            self.aligner.align(text, saved_audio(text, voice), audio_digest(text, voice))
+        return {'prepared': len(texts), 'generated': len(missing)}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -255,7 +261,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.allowed():
             return
-        if self.path not in ('/speech', '/prerender'):
+        if self.path not in ('/speech', '/prerender', '/timings'):
             self.respond(404, {'error': 'Not found.'})
             return
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
@@ -275,6 +281,26 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(400, {'error': str(exc)})
             return
         narrator = self.server.narrator
+        if self.path == '/timings':
+            timings = saved_timings(audio_digest(text, voice))
+            if timings is not None:
+                self.respond(200, timings)
+                return
+            audio = saved_audio(text, voice)
+            if audio is None:
+                self.respond(404, {'error': 'Prepare the audio before requesting word timings.'})
+                return
+            if not narrator.alignment_slots.acquire(blocking=False):
+                self.respond(429, {'error': 'Word alignment is busy.'})
+                return
+            try:
+                self.respond(200, narrator.aligner.align(text, audio, audio_digest(text, voice)))
+            except Exception:
+                log.exception('Word alignment failed')
+                self.respond(503, {'error': 'Word timings are unavailable; passage playback remains available.'})
+            finally:
+                narrator.alignment_slots.release()
+            return
         # A saved WAV must never queue behind model loading or GPU generation.
         if self.path == '/speech':
             audio = saved_audio(text, voice)

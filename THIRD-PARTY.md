@@ -5,6 +5,8 @@ The project license applies to this repository's original application and course
 - Qwen3-TTS code and model weights: Apache License 2.0. [Official repository](https://github.com/QwenLM/Qwen3-TTS), [VoiceDesign model](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign), [Base model](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base).
 - PyTorch and torchaudio: see their bundled license and third-party notices. [PyTorch license](https://github.com/pytorch/pytorch/blob/main/LICENSE).
 - Hugging Face Transformers and Accelerate: Apache License 2.0. Their package metadata and notices cover dependencies separately.
+- Meta Wav2Vec2 Base 960h model weights (local acoustic word alignment): Apache License 2.0. [Official model card](https://huggingface.co/facebook/wav2vec2-base-960h). Revision pinned in `alignment.py`.
+- num2words (number normalization for word alignment): LGPL; see its bundled license. [Official repository](https://github.com/savoirfairelinux/num2words).
 - Playwright (development and browser verification only): Apache License 2.0. [Official repository](https://github.com/microsoft/playwright).
 
 Model weights and Python environments are downloaded during setup and are not committed here. Preserve their included notices if redistributing them. Setup generates original synthetic narrator references from descriptions; no person's reference recording is supplied or cloned. Ordinary narration reuses these synthetic references through Qwen's Base model.

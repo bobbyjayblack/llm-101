@@ -19,5 +19,8 @@ test('web server preserves static allowlist and protects speech endpoint',async(
     assert.equal((await request('/api/audio/speech',{method:'POST',headers:{Origin:'https://attacker.example','Content-Type':'application/json'},body:'{}'})).status,403);
     assert.equal((await request('/api/audio/speech',{method:'POST',body:'{}'})).status,415);
     assert.equal((await request('/api/audio/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:'a'.repeat(10001)})).status,413);
+    assert.equal((await request('/api/audio/timings',{method:'POST',headers:{Origin:'https://attacker.example','Content-Type':'application/json'},body:'{}'})).status,403);
+    assert.equal((await request('/api/audio/timings',{method:'POST',body:'{}'})).status,415);
+    assert.equal((await request('/api/audio/timings',{method:'POST',headers:{'Content-Type':'application/json'},body:'a'.repeat(10001)})).status,413);
   }finally{await new Promise(resolve=>server.close(resolve));}
 });
