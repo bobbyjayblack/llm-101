@@ -2,6 +2,10 @@
 
 Checked on 2026-09-06.
 
+## Project wiki
+
+Published Home, Getting started, Narration and word underlining, Troubleshooting, and Development and verification, with a sidebar and license footer. All five live pages returned HTTP 200; 11 internal wiki links resolved to authored pages. The GitHub-rendered home page, five-page navigation, and footer were inspected. README now links to the wiki.
+
 ## Word underlining
 
 Style follow-up: removed the spoken word's background and text-color overrides. Its underline uses `currentColor` to match the surrounding text in either theme. The ten existing Node tests passed; timing and playback code were unchanged. Earlier screenshots below show the original word styling.

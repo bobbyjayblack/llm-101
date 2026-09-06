@@ -2,6 +2,8 @@
 
 An audio-first introductory unit for a software engineering graduate seeking deep understanding of AI systems. Includes six complete introductory lessons, a toy training experiment, explained quizzes, oral self-checks, notes, and local progress.
 
+See the [project wiki](https://github.com/bobbyjayblack/llm-101/wiki) for getting started, narration and word underlining, troubleshooting, and development guides.
+
 ## Start
 
 For the full local AI narrator on Windows, install Node.js, [uv](https://docs.astral.sh/uv/getting-started/installation/), and a current NVIDIA driver. Then:
