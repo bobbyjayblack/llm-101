@@ -32,8 +32,10 @@ try{
   await page.getByText('Reading passage 1 of 5.',{exact:true}).waitFor({timeout:180000});
   assert.equal(await page.locator('.passage.active').count(),1);
   await page.getByRole('button',{name:'Stop',exact:true}).click();
+  await page.getByRole('button',{name:'Audio preparation',exact:true}).click();
   await page.getByRole('button',{name:'Prepare lesson audio',exact:true}).click();
   await page.getByRole('button',{name:'Cancel audio preparation',exact:true}).click();
+  await page.getByRole('button',{name:'Close settings',exact:true}).click();
   await page.getByText('Audio preparation stopped. Completed segments remain saved.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Lesson 2: Training versus inference',exact:true}).click();
   await page.locator('#notes').fill('Temporary browser verification note');

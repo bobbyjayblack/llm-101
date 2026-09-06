@@ -6,7 +6,8 @@ const page=await browser.newPage();
 const errors=[];page.on('pageerror',error=>errors.push(error.message));
 try{
   await page.goto('http://127.0.0.1:4173');
-  await page.locator('#unit-select').selectOption('2');
+  await page.locator('#unit-2').click();
+  await page.locator('#unit-lessons-2 button').first().click();
   for(const control of ['#play','#read-lab-task']){
     const started=Date.now();await page.locator(control).click();
     await page.waitForFunction(()=>CSS.highlights.get('spoken-word')?.size>0,{},{timeout:240000});

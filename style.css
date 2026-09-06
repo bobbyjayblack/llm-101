@@ -18,14 +18,11 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 @media(max-width:900px){.course-layout{grid-template-columns:1fr}.course-sidebar{position:static;max-height:none;overflow:visible}.course-sidebar .player{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:701px) and (max-width:1100px){.course-layout{grid-template-columns:240px minmax(0,1fr)}.course-sidebar{position:sticky;top:.5rem;max-height:calc(100dvh - 1rem);overflow-y:auto}.course-sidebar .player{grid-template-columns:1fr}.course-sidebar .panel,.course-content .panel{padding:.65rem}.passage{padding:.6rem}}
 @media(max-width:700px){.course-layout{grid-template-columns:1fr}}
-#toggle-sidebar{width:100%;margin-bottom:.75rem}
 .current-lesson{font-weight:600;line-height:1.4}
 .sidebar-compact .course-sidebar .panel{padding:.4rem}
 .sidebar-compact .course-sidebar .player{grid-template-columns:repeat(2,minmax(0,1fr));gap:.3rem}
 .sidebar-compact .player button{padding:.35rem .15rem;font-size:.8rem}
-.sidebar-compact #toggle-sidebar{font-size:.85rem;padding:.35rem .2rem}
 .sidebar-compact .audio-panel h2{font-size:1rem}
-.sidebar-compact #audio-status{font-size:.8rem;line-height:1.4}
 @media(min-width:701px){.course-layout.sidebar-compact{grid-template-columns:9rem minmax(0,1fr)}}
 .app-header{display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)}
 .app-header h1{flex-shrink:0}
@@ -52,19 +49,32 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 .course-layout.sidebar-compact{grid-template-columns:4rem minmax(0,1fr)}
 .sidebar-compact .course-sidebar{position:sticky;max-height:calc(100dvh - 4rem);overflow-y:auto;scrollbar-gutter:auto;padding:.2rem}
 .sidebar-compact .course-sidebar .panel{padding:.2rem;margin-bottom:.4rem}
-.sidebar-compact .lesson-label,.sidebar-compact .toggle-label,.sidebar-compact #current-lesson,.sidebar-compact #sidebar-details h2{display:none}
-.sidebar-compact #audio-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.sidebar-compact #prepared-audio-status{display:none}
-.sidebar-compact #toggle-sidebar{font-size:1.2rem;margin:0;padding:.2rem;min-height:48px}
+.sidebar-compact .lesson-label,.sidebar-compact #sidebar-details h2{display:none}
 .sidebar-compact .course-sidebar .lesson-nav button{justify-content:center;min-width:48px;padding:.15rem;gap:0}
 .sidebar-compact .lesson-number{border:0;min-width:0;min-height:0}
 .sidebar-compact .course-sidebar .lesson-nav{gap:.4rem}
 @media(max-width:480px){.app-header{gap:.25rem;padding:.35rem}.app-header h1{font-size:.7rem}.app-header .player{gap:.15rem}.course-layout{gap:.3rem}}
 ::highlight(spoken-word){text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:currentColor;text-decoration-thickness:.12em;text-underline-offset:.18em}
-#unit-select{margin-bottom:1rem;max-width:100%}
+#course-units{display:grid;gap:.6rem}
+.unit-toggle{display:flex;align-items:center;gap:.4rem;width:100%;text-align:left;padding:.4rem;font-weight:600}
+.unit-label{min-width:0;overflow-wrap:anywhere}
+.unit-number{font-size:.75rem;flex-shrink:0}
+.unit-arrow{margin-left:auto;flex-shrink:0}
+.unit-toggle[aria-expanded=true]{border-color:var(--accent);color:var(--accent)}
+.course-sidebar .course-unit .lesson-nav{margin:.5rem 0 .5rem .5rem;padding-left:.4rem;border-left:2px solid var(--border)}
+.lesson-nav[hidden]{display:none}
+.sidebar-compact .unit-label{display:none}
+.sidebar-compact .unit-toggle{justify-content:center;padding:.1rem;gap:.1rem;min-height:48px}
+.sidebar-compact .unit-arrow{margin-left:0;font-size:.65rem}
+.sidebar-compact .course-unit .lesson-nav{margin:.3rem 0;padding-left:0}
 #unit-lab{border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem}
 #unit-lab select,#lab-query{display:block;width:100%;max-width:100%;margin:.5rem 0 1rem;background:var(--bg);color:var(--ink);border:1px solid var(--border);padding:.5rem}
 #lab-result{overflow-wrap:anywhere;white-space:pre-wrap}
-.sidebar-compact #unit-select{font-size:.65rem;padding:.1rem;min-height:48px}
-.sidebar-compact label[for=unit-select]{font-size:.6rem;overflow-wrap:anywhere}
-.sidebar-compact #prepare-lesson{font-size:.6rem;padding:.15rem;width:100%;overflow-wrap:anywhere}
+
+.header-settings{display:flex;gap:.3rem;justify-self:end}
+#audio-preparation h3{margin:0}
+#current-lesson{margin-bottom:.3rem}
+#audio-status{margin-top:0}
+
+.header-brand{display:flex;align-items:center;gap:.4rem;min-width:0}
+.header-brand h1{flex-shrink:1}

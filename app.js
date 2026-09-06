@@ -77,10 +77,26 @@ function read(index=current,single=false){
     synth.speak(utterance);
   }passage();
 }
-function render(focus=false){
-  halt();const l=lessons[state.lesson];
-  $('unit-select').value=String(l.unit);
-  $('lessons').replaceChildren(...lessons.map((item,i)=>({item,i})).filter(({item})=>item.unit===l.unit).map(({item,i})=>{
+function renderNavigation(){
+  $('course-units').replaceChildren(...units.map(unit=>{
+    const group=document.createElement('div');group.className='course-unit';
+    const toggle=document.createElement('button');toggle.className='unit-toggle';toggle.id=`unit-${unit.id}`;
+    toggle.setAttribute('aria-label',`Unit ${unit.id}: ${unit.title}`);toggle.title=`Unit ${unit.id}: ${unit.title}`;
+    toggle.setAttribute('aria-controls',`unit-lessons-${unit.id}`);
+    const number=document.createElement('span');number.className='unit-number';number.textContent=`U${unit.id}`;number.setAttribute('aria-hidden','true');
+    const title=document.createElement('span');title.className='unit-label';title.textContent=unit.title;title.setAttribute('aria-hidden','true');
+    const arrow=document.createElement('span');arrow.className='unit-arrow';arrow.setAttribute('aria-hidden','true');
+    const list=document.createElement('div');list.id=`unit-lessons-${unit.id}`;list.className='lesson-nav';
+    const expand=open=>{list.hidden=!open;toggle.setAttribute('aria-expanded',String(open));arrow.textContent=open?'▾':'▸';};
+    expand(unit.id===lessons[state.lesson].unit);
+    toggle.append(number,title,arrow);
+    toggle.onclick=()=>{
+      const open=list.hidden;
+      for(const button of document.querySelectorAll('.unit-toggle')){button.setAttribute('aria-expanded','false');button.querySelector('.unit-arrow').textContent='▸';$(button.getAttribute('aria-controls')).hidden=true;}
+      expand(open);
+      if(open)$('lesson').scrollIntoView({block:'start',behavior:'instant'});
+    };
+    list.replaceChildren(...lessons.map((item,i)=>({item,i})).filter(({item})=>item.unit===unit.id).map(({item,i})=>{
     const b=document.createElement('button');
     const label=`Lesson ${i+1}: ${item.title}${state.reviewed[i]?' · reviewed':''}`;
     b.setAttribute('aria-label',label);b.title=label;
@@ -88,9 +104,15 @@ function render(focus=false){
     const title=document.createElement('span');title.className='lesson-label';title.textContent=`${item.title}${state.reviewed[i]?' · reviewed':''}`;title.setAttribute('aria-hidden','true');
     b.append(number,title);if(i===state.lesson)b.setAttribute('aria-current','step');
     b.onclick=()=>{state.lesson=i;current=0;render(true);};return b;
+    }));
+    group.append(toggle,list);return group;
   }));
+}
+function render(focus=false){
+  halt();const l=lessons[state.lesson];
+  renderNavigation();
   $('lesson-meta').textContent=`UNIT ${l.unit} OF ${units.length} · ${units[l.unit-1].title} · LESSON ${state.lesson+1} OF ${lessons.length}`;$('title').textContent=l.title;$('objective').textContent=l.goal;
-  $('current-lesson').textContent=`${state.lesson+1}. ${l.title}`;
+  $('lesson-number-label').textContent=`${state.lesson+1}. `;
   $('passages').replaceChildren(...l.paragraphs.map((text,i)=>{const div=document.createElement('div');div.className='passage';const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.textContent=`Read from passage ${i+1}`;b.onclick=()=>read(i);div.append(p,b);return div;}));
   if(l.code){const pre=document.createElement('pre');pre.textContent=l.code;$('passages').append(pre);}
   $('experiment').hidden=!l.experiment;$('question').textContent=l.question;
@@ -151,14 +173,13 @@ $('play').onclick=()=>read();$('replay').onclick=()=>read(current,true);$('stop'
 $('pause').onclick=async()=>{if(!speaking)return;paused=!paused;try{if(state.engine==='local')await localNarration.setPaused(paused);else if(paused)synth.pause();else synth.resume();status(paused?'Paused. Select Resume to continue.':'Narration resumed.');}catch{halt();status('Playback could not resume. Select Play to try again.');}};
 $('restart').onclick=()=>read(0);
 $('open-settings').onclick=()=>$('settings-dialog').showModal();
+$('open-preparation').onclick=()=>{$('settings-dialog').showModal();$('prepare-lesson').focus();$('audio-preparation').scrollIntoView({block:'start'});};
 $('close-settings').onclick=()=>$('settings-dialog').close();
 $('notes').oninput=()=>{state.notes[state.lesson]=$('notes').value;save();};
 $('check').onclick=()=>{const answer=state.answers[state.lesson];$('feedback').textContent=answer===undefined?'Choose an answer first.':answer===lessons[state.lesson].correct?'Correct. '+lessons[state.lesson].explanation:'Revisit this idea. '+lessons[state.lesson].explanation;};
 $('complete').onclick=()=>{state.reviewed[state.lesson]=Date.now();render();};
 $('next').onclick=()=>{if(state.lesson<lessons.length-1){state.lesson++;current=0;render(true);}};
 $('previous').onclick=()=>{if(state.lesson>0){state.lesson--;current=0;render(true);}};
-$('unit-select').replaceChildren(...units.map(unit=>{const option=document.createElement('option');option.value=unit.id;option.textContent=`${unit.id}. ${unit.title}`;return option;}));
-$('unit-select').onchange=()=>{state.lesson=lessons.findIndex(lesson=>lesson.unit===Number($('unit-select').value));current=0;render(true);};
 function sidebar(){
   const compact=Boolean(state.sidebarCompact);
   document.querySelector('.course-layout').classList.toggle('sidebar-compact',compact);
@@ -168,8 +189,7 @@ function sidebar(){
   $('toggle-sidebar').setAttribute('aria-label',label);$('toggle-sidebar').title=label;
   $('toggle-sidebar').replaceChildren();
   const icon=document.createElement('span');icon.textContent=compact?'»':'«';icon.setAttribute('aria-hidden','true');
-  const text=document.createElement('span');text.className='toggle-label';text.textContent=' Collapse';text.setAttribute('aria-hidden','true');
-  $('toggle-sidebar').append(icon,text);
+  $('toggle-sidebar').append(icon);
 }
 $('toggle-sidebar').onclick=()=>{state.sidebarCompact=!state.sidebarCompact;sidebar();save();};
 function appearance(){document.documentElement.style.fontSize=state.size+'px';document.body.classList.toggle('light',state.theme==='light');}

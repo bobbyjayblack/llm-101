@@ -2,6 +2,22 @@
 
 Checked on 2026-09-06.
 
+## Compact header toggle
+
+Moved the sidebar toggle to an icon immediately left of the LLM 101 header title and removed its separate sidebar panel and visible Collapse label. The icon retains its accessible name, expanded state, keyboard button behavior, and saved compact preference. Updated the browser tab title as well. All 19 Node tests and both browser suites passed, including compact-mode navigation and viewport overflow checks; inspected the updated header screenshot.
+
+## Lesson status and audio-preparation layout
+
+Moved the numbered lesson heading and reading status directly beneath the unit/lesson metadata. Audio preparation progress and controls now live at the top of Reading & audio settings, with a dedicated audio shortcut immediately left of the cogwheel. Expanding a unit scrolls the current lesson to the top below the sticky header without changing the selected lesson or passage.
+
+All 19 Node tests and both browser suites passed. Checks cover metadata/title/status ordering, expansion scroll position, preparation open/cancel through the modal, status visibility in compact mode, playback, notes, all lessons/labs, and viewport overflow. Inspected the 36 px light settings modal and 24 px dark layout. No voice or course audio changes were made.
+
+## Expandable course-unit navigation
+
+Replaced the dropdown with 13 unit buttons and nested lesson lists. One unit expands at a time; clicking it again collapses its lessons. Expanding a unit leaves the current lesson and notes untouched. Selecting a lesson or using Next/Previous expands the matching unit, including after reload.
+
+All 19 Node tests and the real-playback/full-curriculum browser suites passed. Browser checks cover all unit headings remaining available, nested lessons preceding the next unit, collapse behavior, Enter/Space activation, Tab into lessons, cross-unit navigation, saved notes, compact mode, 36 px light/24 px dark settings, and mobile overflow. Inspected the expanded-unit screenshot. README navigation instructions and the new-content audio check were updated for the new controls; no lesson text, voice settings, or audio inventory changed.
+
 ## Documentation refresh
 
 Updated README, course design, contributor instructions, and the wiki to describe the implemented study workflow, lab limits, text-only note export, installation updates, and current-plan audio preparation states. Design targets are distinguished from completed accessibility checks and self-reviewed progress. The course's source code, voice configuration, and audio inventory were unchanged in this documentation update.

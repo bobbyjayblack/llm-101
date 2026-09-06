@@ -4,6 +4,15 @@
 
 LLM 101 is an audio-first AI course implemented with plain HTML, CSS, and JavaScript. All 13 units contain 30 lessons and 13 runnable labs. The capstone is a bounded extractive assistant; a generative conversational tutor remains future work. Read README.md and COURSE-DESIGN.md before changing course behavior.
 
+## Release command
+
+When the user sends `release` as a command, treat it as authorization to complete the project release without another confirmation:
+
+1. Review pending project changes, update relevant documentation, and run the checks appropriate to those changes.
+2. Commit and push the project changes to the repository's primary branch (`main` currently; `master` if applicable). Exclude credentials, learner data, dependencies, and generated model/audio files.
+3. Update the GitHub wiki to match the released behavior, then commit and push its separate repository (`https://github.com/bobbyjayblack/llm-101.wiki.git`, branch `master`).
+4. Verify both remote branches contain the intended commits and report the release outcome. If either operation fails, report what remains unfinished rather than claiming a complete release.
+
 ## Development
 
 - Run `npm start` (or `npm.cmd start` on Windows) and open http://127.0.0.1:4173.

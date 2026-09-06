@@ -52,7 +52,7 @@ Setup downloads the pinned alignment model (approximately 360 MB); alignment run
 
 Qwen3-TTS-12Hz-1.7B-VoiceDesign creates short reference recordings during setup. The companion 1.7B-Base model reuses those references for a consistent narrator. Only the Base model remains loaded during ordinary use. Both run through the official `qwen-tts` package with CUDA PyTorch and Windows-compatible SDPA attention. Model revisions are pinned in `audio_service.py`.
 
-Claire's course narration is pre-rendered automatically in batches of up to four segments: lesson readings first, followed by questions, feedback, self-checks, recall prompts, lab instructions, explanations, default scenario results, and previews. Progress and the current inventory size appear under the player status. The expanded course takes substantially longer to prepare than the original six lessons. Once saved, a segment is served immediately from disk, bypassing the model's generation queue even when the GPU is busy. The player fetches the following segment ahead of time. Passage highlighting and pitch-preserving speed control remain available.
+Claire's course narration is pre-rendered automatically in batches of up to four segments: lesson readings first, followed by questions, feedback, self-checks, recall prompts, lab instructions, explanations, default scenario results, and previews. Progress and the current inventory size appear in Reading & audio settings. The audio button immediately left of the settings cogwheel opens the Audio preparation section, including Prepare lesson audio. The expanded course takes substantially longer to prepare than the original six lessons. Once saved, a segment is served immediately from disk, bypassing the model's generation queue even when the GPU is busy. The player fetches the following segment ahead of time. Passage highlighting and pitch-preserving speed control remain available.
 
 The first pre-render takes time; completed passages can be played while the remaining ones are generated. New text, changed voices/content, other narrators, and dynamic experiment-result readings may still require synthesis. The next start automatically fills missing Claire recordings. Unchanged recordings are reused. Stop in the player stops playback; `stop.bat` also stops the background render and unloads the model. Completed recordings survive interruption.
 
@@ -66,7 +66,9 @@ For pre-render progress or errors, see `.service/prerender-claire.json` and `.se
 
 ## Lessons and labs
 
-Choose **Course unit** in the sidebar, then a lesson. **Next lesson** and **Previous lesson** also cross unit boundaries. Original notes, answers, review dates, and passage bookmarks remain attached to the original six lessons.
+The header is labeled **LLM 101**. Its leftmost arrow icon toggles the compact sidebar; the icon's tooltip and accessible label switch between Collapse sidebar and Expand sidebar.
+
+All 13 **Course units** appear in the sidebar. Click a unit to expand its lessons directly underneath; the other unit headings remain in order below. Opening another unit collapses the previous list, and clicking an expanded unit collapses it. Select a lesson to open it. Expanding a unit scrolls the current lesson to the top without changing your reading position or notes. The numbered lesson title and reading status appear directly beneath the unit/lesson line. **Next lesson** and **Previous lesson** cross unit boundaries and expand the matching unit automatically. Unit buttons support Enter and Space; Tab reaches the expanded lessons. Original notes, answers, review dates, and passage bookmarks remain attached to the original six lessons.
 
 | Unit | Lessons | Runnable lab |
 | --- | --- | --- |

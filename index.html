@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI, understood · Your learning studio</title><link rel="stylesheet" href="style.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LLM 101 · Your learning studio</title><link rel="stylesheet" href="style.css"></head>
 <body><a class="skip" href="#lesson">Skip to lesson</a>
-<header class="app-header"><h1>AI, understood.</h1>
+<header class="app-header"><div class="header-brand"><button id="toggle-sidebar" class="icon-button" aria-label="Collapse sidebar" title="Collapse sidebar" aria-expanded="true" aria-controls="sidebar-details"><span aria-hidden="true">«</span></button><h1>LLM 101</h1></div>
 <div class="player" role="group" aria-label="Narration controls">
 <button id="play" class="icon-button" aria-label="Play lesson" title="Play lesson"><span aria-hidden="true">▶</span></button>
 <button id="stop" class="icon-button" aria-label="Stop" title="Stop" hidden><span aria-hidden="true">■</span></button>
@@ -9,10 +9,10 @@
 <button id="restart" class="icon-button" aria-label="Restart lesson" title="Restart lesson"><span aria-hidden="true">⟳</span></button>
 <button id="replay" class="icon-button" aria-label="Replay passage" title="Replay passage"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4H4v5M4 4l6 6M12 5h8v15H8v-7M12 13h5M12 17h5"/></svg></button>
 </div>
-<button id="open-settings" class="icon-button" aria-label="Reading and audio settings" title="Reading and audio settings" aria-haspopup="dialog"><span aria-hidden="true">⚙</span></button>
-</header>
+<div class="header-settings"><button id="open-preparation" class="icon-button" aria-label="Audio preparation" title="Audio preparation" aria-haspopup="dialog"><span aria-hidden="true">♫</span></button><button id="open-settings" class="icon-button" aria-label="Reading and audio settings" title="Reading and audio settings" aria-haspopup="dialog"><span aria-hidden="true">⚙</span></button>
+</div></header>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><div class="dialog-heading"><h2 id="settings-title">Reading & audio settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings" title="Close settings"><span aria-hidden="true">×</span></button></div><div class="settings">
-<label>Text size <select id="size"><option value="24">Large · 24 px</option><option value="30">Larger · 30 px</option><option value="36">Extra large · 36 px</option></select></label>
+<section id="audio-preparation" aria-labelledby="preparation-title"><h3 id="preparation-title">Audio preparation</h3><p id="prepared-audio-status"></p><button id="prepare-lesson" type="button">Prepare lesson audio</button></section><label>Text size <select id="size"><option value="24">Large · 24 px</option><option value="30">Larger · 30 px</option><option value="36">Extra large · 36 px</option></select></label>
 <label>Appearance <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
 <label>Speaking speed <select id="rate"><option value="0.75">0.75 ×</option><option value="1">1 ×</option><option value="1.25">1.25 ×</option><option value="1.3">1.3 ×</option><option value="1.5">1.5 ×</option></select></label>
 <label>Audio source <select id="engine"><option value="local">Local AI narrator</option><option value="browser">Browser voices</option></select></label>
@@ -22,16 +22,13 @@
 </div><p id="voice-note"></p><p id="local-audio-status" role="status">Checking local narrator...</p><button id="refresh-audio" type="button">Check narrator status</button></dialog>
 <main class="course-layout">
 <aside class="course-sidebar" aria-label="Lesson navigation">
-<section class="panel"><button id="toggle-sidebar" aria-expanded="true" aria-controls="sidebar-details">Minimize panel</button>
-<p id="current-lesson" class="current-lesson"></p>
-<p id="audio-status" role="status">Ready to read. Underlining follows the spoken words.</p><p id="prepared-audio-status"></p><button id="prepare-lesson" type="button">Prepare lesson audio</button></section>
 <div id="sidebar-details">
-<section class="panel"><label for="unit-select">Course unit</label><select id="unit-select"></select><h2>Lessons</h2><nav aria-label="Lessons" id="lessons" class="lesson-nav"></nav></section>
+<section class="panel"><h2>Course units</h2><nav aria-label="Course units and lessons" id="course-units"></nav></section>
 </div>
 </aside>
 <div class="course-content">
 <article id="lesson" tabindex="-1" class="panel">
-<p id="lesson-meta" class="eyebrow"></p><h2 id="title"></h2><p id="objective"></p>
+<p id="lesson-meta" class="eyebrow"></p><h2 id="current-lesson"><span id="lesson-number-label"></span><span id="title"></span></h2><p id="audio-status" role="status">Ready to read. Underlining follows the spoken words.</p><p id="objective"></p>
 <div id="passages"></div>
 <section id="experiment" hidden><h3>Try it: one learning step</h3><p>Our toy predictor multiplies an input by one adjustable weight. The example input is 2 and the target is 6. Predict what will happen before changing the weight.</p><label>Weight <input id="weight" type="range" min="0" max="5" step="0.5" value="1"></label><output id="result" aria-live="polite"></output><button id="read-result">Read experiment result</button><button id="train">Move the weight one training step</button><button id="reset-experiment">Reset experiment</button><p>Training step: add 0.1 times the input times the prediction error to the weight. This reduces half the squared error for this example. This is a one-parameter teaching model, not an LLM.</p></section>
 <section id="unit-lab" aria-labelledby="lab-title"><h3 id="lab-title"></h3><p id="lab-task"></p><button id="read-lab-task">Read lab instructions</button><label for="lab-scenario">Lab scenario</label><select id="lab-scenario"></select><label id="lab-query-label" for="lab-query">Question for the lab assistant<input id="lab-query" type="text" maxlength="500"></label><button id="run-lab">Run lab</button><p id="lab-result" role="status"></p><button id="read-lab-result" disabled>Read lab result</button><details id="lab-solution"><summary>Expected result and troubleshooting</summary><p id="lab-expected"></p><p id="lab-troubleshooting"></p></details><button id="read-lab-solution">Read lab explanation</button><details><summary>Run and inspect the code</summary><p>From this project's directory, run the command below. Replace the last 0 with 1 for the second scenario.</p><pre id="lab-command"></pre><p><a href="labs.js" target="_blank" rel="noopener">Inspect the lab source</a>. All lab calculations run locally without a model download or a paid API.</p></details></section>
