@@ -30,6 +30,8 @@ Reading & audio settings defaults to **Local AI narrator**, with three AI-design
 
 Claire uses a soft, rounded, velvety tone with a subtle whimsical lilt at a steady conversational pace. Her delivery is directed toward connected speech: gently linked word endings and beginnings, lighter unstressed words, and emphasis across whole phrases. Speaking speed remains controlled separately by your saved speed setting.
 
+Playback now defaults to **1.5×** (50% faster than the original 1×). Existing settings receive this change once on reload; subsequent manual speed choices remain saved. Local playback preserves pitch and reuses the same voice recordings.
+
 Qwen3-TTS-12Hz-1.7B-VoiceDesign creates short reference recordings during setup. The companion 1.7B-Base model reuses those references for a consistent narrator. Only the Base model remains loaded during ordinary use. Both run through the official `qwen-tts` package with CUDA PyTorch and Windows-compatible SDPA attention. Model revisions are pinned in `audio_service.py`.
 
 Speech is generated in short segments. The next segment is prepared during playback; passages stay highlighted as their audio plays. First readings may pause for generation, especially at faster playback speeds. Replays use a disk cache. Playback speed changes preserve pitch. Stop cancels playback and pending browser requests immediately; a segment already being computed may finish and enter the cache. `stop.bat` terminates that work and releases the model.

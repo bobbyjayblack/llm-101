@@ -2,6 +2,8 @@
 
 Checked on 2026-09-06.
 
+Playback-speed update: the default is now 1.5x, with a one-time migration for existing settings. A separate headless Chrome context verified the fresh default, migration from 1x, preservation of notes, and persistence of a subsequent manual speed change. All seven Node tests and the app.js syntax check passed. Voice files and pitch-preserving playback behavior were unchanged.
+
 ## Local Qwen3-TTS integration
 
 Claire connected-speech revision, 2026-09-06: retained her soft/whimsical tone description and seed, adding directions for linked word boundaries, reduced unstressed words, and phrase-level emphasis. Regenerated Claire's reference and restarted both services. The same preview measured 9.68 seconds versus 10.40 seconds previously; the saved playback speed was not changed. A local Whisper base.en transcription recovered the intended wording with the same minor "try an"/"try and" ambiguity. Real WAV generation and cache replay passed; Grace and Helen remained cached. Seven Node and three Python tests passed. These checks establish functionality and intelligibility, not a subjective guarantee of improved coarticulation or identical vocal timbre.

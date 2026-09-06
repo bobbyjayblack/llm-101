@@ -2,8 +2,10 @@ import {lessons,trainingResult,trainingStep} from './course.js';
 import {LocalNarration,speechParts} from './narration.js';
 const $=id=>document.getElementById(id);
 const key='ai-understood-v1';
-let state={lesson:0,passage:0,notes:{},reviewed:{},answers:{},size:'24',theme:'dark',rate:'1',voice:'',follow:false,engine:'local',localVoice:'claire'};
+let state={lesson:0,passage:0,notes:{},reviewed:{},answers:{},size:'24',theme:'dark',rate:'1.5',voice:'',follow:false,engine:'local',localVoice:'claire'};
 try{const saved=JSON.parse(localStorage.getItem(key));if(saved&&typeof saved==='object')state={...state,...saved};}catch{}
+// Apply the requested faster pace once; later manual speed choices still persist.
+if(!state.narrationSpeedUpdated){state.rate='1.5';state.narrationSpeedUpdated=true;}
 if(!Number.isInteger(state.lesson)||!lessons[state.lesson])state.lesson=0;
 for(const k of ['notes','reviewed','answers'])if(!state[k]||typeof state[k]!=='object')state[k]={};
 let current=Math.max(0,Math.min(Number(state.passage)||0,lessons[state.lesson].paragraphs.length-1));
