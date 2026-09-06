@@ -1,1 +1,13 @@
-{"name":"llm101","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test course.test.js narration.test.js server.test.js","test:browser":"node checks/browser.mjs"},"devDependencies":{"playwright":"1.63.0"}}
+{
+  "name": "llm101",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test course.test.js labs.test.js narration.test.js server.test.js",
+    "test:browser": "node checks/browser.mjs && node checks/full-course-browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

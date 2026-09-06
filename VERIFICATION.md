@@ -1,6 +1,19 @@
-# First-unit verification
+# Course verification
 
 Checked on 2026-09-06.
+
+## Full curriculum implementation
+
+All 13 units now contain 30 lessons (the original six plus 24 new lessons), with approximately 10,900 words of teaching text, lesson quizzes and explanations, oral prompts and criteria, and spaced recall. Each unit has a runnable local lab with two scenarios, expected results, troubleshooting, source inspection, and a Node CLI. Units 9 and 13 accept questions against a small authored source collection. The capstone is a deterministic extractive assistant, not a generative conversational tutor.
+
+- Nineteen Node tests passed, covering all units, numerical labs, complete audio-plan text coverage, cancellation/timing behavior, and HTTP boundaries. Nine Python speech/alignment tests passed.
+- The full-course Chrome check visited all 30 lessons, checked every correct quiz response, and ran all 26 lab scenarios. It verified cross-unit Next/Previous, first/last boundaries, keyboard unit selection, existing lesson-2 notes and passage bookmark, new capstone notes and review persistence, and an unsupported capstone question. No page errors occurred.
+- The nonlinear network achieved held-out MSE 0.004695 versus mean-baseline 0.097656. Corrupting the center label increased held-out MSE to 0.131212. The rank-one target fitted below 0.00001 MSE; a full-rank target retained 0.1875 MSE. Tests also checked leakage paths, causal masking, checkpoint state, KV memory, word edit distance, motion alignment, source refusal, and cache invalidation.
+- Existing real-narration browser checks passed: preview, lesson playback, pause/resume/stop, preparation cancellation, voice/settings controls, and note persistence. A new unit-2 lesson produced real audio and a visible timed word underline within 765 ms of the test action; fresh lab-instruction audio reached that point after 41.16 seconds while background rendering was active. These timings include browser actions and alignment availability, not isolated first-sound measurements. Pause/resume and clearing the underline on Stop passed for both new-content paths.
+- Inspected 36 px light and 24 px dark screenshots. Desktop and 480 px viewport checks found no horizontal document overflow. Lab results use readable labels and lists rather than raw JSON punctuation; CLI output retains structured JSON. Full assistive-technology conformance and long-session learner comfort remain unverified.
+- The expanded Claire plan contains 757 unique clips, including 451 lesson-reading segments. Startup reused existing recordings and began rendering missing material with word timings. Preparation remains in progress; no complete acoustic or intelligibility sweep of all 30 lessons is claimed. Custom lab questions and uncached text can require fresh synthesis. The sidebar's progress is keyed to the current content plan, so the former six-lesson completion cannot label the expanded course ready.
+
+Reproduce curriculum UI checks with `npm run test:browser`, and the new lesson/lab speech check with `node checks/new-content-audio.mjs` while both services run. Generated recordings and test screenshots remain local and are excluded from Git. The sections below record earlier work and their six-lesson inventories; their cache totals and latency measurements are historical.
 
 ## Project wiki
 

@@ -1,6 +1,6 @@
 # LLM 101 — AI, understood
 
-An audio-first introductory unit for a software engineering graduate seeking deep understanding of AI systems. Includes six complete introductory lessons, a toy training experiment, explained quizzes, oral self-checks, notes, and local progress.
+An audio-first course for a software engineering graduate seeking understanding of AI systems. All 13 curriculum units are available as 30 lessons, with 13 runnable labs, explained quizzes, oral self-checks, spaced recall prompts, notes, and local progress.
 
 See the [project wiki](https://github.com/bobbyjayblack/llm-101/wiki) for getting started, narration and word underlining, troubleshooting, and development guides.
 
@@ -40,11 +40,11 @@ Setup downloads the pinned alignment model (approximately 360 MB); alignment run
 
 Qwen3-TTS-12Hz-1.7B-VoiceDesign creates short reference recordings during setup. The companion 1.7B-Base model reuses those references for a consistent narrator. Only the Base model remains loaded during ordinary use. Both run through the official `qwen-tts` package with CUDA PyTorch and Windows-compatible SDPA attention. Model revisions are pinned in `audio_service.py`.
 
-Claire's lesson narration is pre-rendered automatically in batches of up to four segments. The current unit contains 127 unique segments: all 84 lesson-reading segments first, followed by static questions, feedback, self-check material, and preview text. Progress appears under the player status. Once saved, a segment is served immediately from disk, bypassing the model's generation queue even when the GPU is busy. The player fetches the following segment ahead of time. Passage highlighting and pitch-preserving speed control remain available.
+Claire's course narration is pre-rendered automatically in batches of up to four segments: lesson readings first, followed by questions, feedback, self-checks, recall prompts, lab instructions, explanations, default scenario results, and previews. Progress and the current inventory size appear under the player status. The expanded course takes substantially longer to prepare than the original six lessons. Once saved, a segment is served immediately from disk, bypassing the model's generation queue even when the GPU is busy. The player fetches the following segment ahead of time. Passage highlighting and pitch-preserving speed control remain available.
 
 The first pre-render takes time; completed passages can be played while the remaining ones are generated. New text, changed voices/content, other narrators, and dynamic experiment-result readings may still require synthesis. The next start automatically fills missing Claire recordings. Unchanged recordings are reused. Stop in the player stops playback; `stop.bat` also stops the background render and unloads the model. Completed recordings survive interruption.
 
-**Prepare lesson audio** remains available to prepare a chosen lesson or another narrator on demand. It shows progress and can be canceled independently of the automatic Claire render. Selecting Play or changing lessons/voices cancels this manual preparation and starts the requested action.
+**Prepare lesson audio** prepares a chosen lesson, its practice and lab material, or another narrator on demand. It shows progress and can be canceled independently of the automatic Claire render. Selecting Play or changing lessons/voices cancels this manual preparation and starts the requested action. Custom questions produce dynamic lab answers that may need fresh synthesis.
 
 Models live in `.models/`; voice references live in `.audio/voices/`. Durable pre-rendered recordings live in `.audio/course/` and are not removed by temporary-cache cleanup. Other generated speech uses `.audio/cache/` (approximately 1 GB maximum). These files and `.venv/` are excluded from Git. Normal narration runs with Hugging Face/Transformers offline mode enabled. Only initial setup or explicitly rerunning setup downloads files. Browser voices remain an optional fallback and may use network services.
 
@@ -52,9 +52,41 @@ To change voice descriptions, edit `voices.json`, stop both services, then run `
 
 For pre-render progress or errors, see `.service/prerender-claire.json` and `.service/prerender-stderr.log`. Running `start.bat` again retries an exited worker. It never creates a duplicate launcher-managed worker. Old voice versions remain separate on disk and are not used for a changed voice.
 
+## Lessons and labs
+
+Choose **Course unit** in the sidebar, then a lesson. **Next lesson** and **Previous lesson** also cross unit boundaries. Original notes, answers, review dates, and passage bookmarks remain attached to the original six lessons.
+
+| Unit | Lessons | Runnable lab |
+| --- | --- | --- |
+| 1. Orientation and the complete system | 1–6 | Trace evidence through a document assistant |
+| 2. Mathematics and numerical computing | 7–8 | Dot product, finite-difference gradient, learning-rate failure |
+| 3. Learning from data | 9–10 | Train a nonlinear network; diagnose a corrupted label |
+| 4. Data sourcing and preparation | 11–12 | Group splits and cross-split duplicate detection |
+| 5. Language modeling foundations | 13–14 | Train a count language model and inspect causal attention |
+| 6. Training at scale | 15–16 | Batch/memory arithmetic and momentum checkpoint recovery |
+| 7. Adaptation and post-training | 17–18 | Fit a low-rank update and inspect capacity limits |
+| 8. Inference and serving | 19–20 | KV-cache memory and weight quantization |
+| 9. Retrieval and application systems | 21–22 | Query evidence with a bounded workflow and hostile fixture |
+| 10. Speech systems | 23–24 | Word error rate, waveform size, and stage latency budget |
+| 11. Images, video, and multimodal systems | 25–26 | Motion alignment and ambiguous reconstruction |
+| 12. Reliable production systems | 27–28 | Acceptance cases, tail latency, and stale-cache failure |
+| 13. Capstone and oral defense | 29–30 | Query, narrate, evaluate, and defend an extractive assistant |
+
+Each unit includes two lab scenarios, instructions, expected results, troubleshooting, and readable source. Predict before selecting **Run lab**; compare the result with the explanation and use the lesson's oral criteria to assess your understanding. Lab instructions, results, explanations, and recall prompts have read-aloud controls. Queries in units 9 and 13 use a small authored collection and lexical matching; unknown questions can return no evidence.
+
+The same exercises run from the repository without Python or a downloaded language model:
+
+```powershell
+node labs.mjs 3 0
+node labs.mjs 3 1
+node labs.mjs 13 0 Where do notes save?
+```
+
+Arguments are unit number (1–13), scenario (0 or 1), and an optional question. Edit `labs.js` to extend the examples, then run `npm test`. The speech latency inputs and large-model memory budgets are illustrative calculations, not measured performance. The nonlinear network and low-rank fitting exercises perform actual local optimization.
+
 ## Development checks
 
-Run `npm test` for content, playback-state, and HTTP-boundary tests, and `.venv\Scripts\python.exe -m unittest audio_service_test` for speech request validation. For real-model checks with both services running, run `.venv\Scripts\python.exe checks\audio-smoke.py`; it saves preview WAVs and timings under `.service/`. For browser integration checks, run `npm ci` and `npm run test:browser` with Google Chrome installed. Playwright is a development dependency only.
+Run `npm test` for content, numerical labs, playback-state, and HTTP-boundary tests, and `.venv\Scripts\python.exe -m unittest audio_service_test alignment_test` for speech and alignment validation. For real-model checks with both services running, run `.venv\Scripts\python.exe checks\audio-smoke.py`; it saves preview WAVs and timings under `.service/`. For browser integration checks, run `npm ci` and `npm run test:browser` with Google Chrome installed. This checks real narration plus all 30 lessons, 26 lab scenarios, quiz feedback, navigation, and progress persistence. Playwright is a development dependency only.
 
 After preparing lesson 1, run `node checks/playback-latency.mjs` to measure actual browser playback onset and segment transitions at 1.3x, and verify speed migration and preference persistence. `node checks/verify-prerender.mjs` checks every planned recording through the live speech endpoint once preparation is complete.
 
@@ -64,7 +96,9 @@ Run `.venv\Scripts\python.exe -m unittest alignment_test` for alignment-path and
 
 - `index.html` and `style.css`: accessible course interface and themes.
 - `app.js` and `narration.js`: course behavior, browser speech, and local audio playback.
-- `course.js`: six lessons and the toy training model.
+- `course.js`: 30 lessons across 13 units and the original training example.
+- `labs.js`, `labs.mjs`: browser exercises and a Node command-line runner; no extra runtime dependencies.
+- `labs.test.js`, `checks/full-course-browser.mjs`: numerical exercise checks and complete curriculum navigation/assessment checks.
 - `course.test.js`: lesson structure and training arithmetic checks.
 - `server.mjs`: Node HTTP server and same-origin audio proxy on port 4173.
 - `audio_service.py`, `voices.json`, and `requirements-audio.txt`: local Qwen speech generation, narrator definitions, and Python dependencies.
@@ -80,7 +114,7 @@ Run `.venv\Scripts\python.exe -m unittest alignment_test` for alignment-path and
 
 Choose Reading & audio settings to adjust text, theme, rate, audio source, and voice. Read lesson starts from the saved passage. The active passage remains highlighted while the current spoken word receives an underline matching the text color, with no word background or text-color change. Each passage has its own replay entry point. Automatic scrolling is off by default. Word styling uses the CSS Custom Highlight API without changing the text or adding screen-reader announcements. Older browsers retain passage highlighting. Browser voices underline words only when the voice provides word-boundary events; local recordings use the cached acoustic timings. Actual voice comfort and pronunciation should be evaluated on the learner's device.
 
-Tab navigates controls. All content is available without audio. Use operating-system dictation in the notes field if preferred. No microphone, gaze tracking, camera, API credential, or conversational AI integration is included. Quizzes use authored feedback; open explanations are self-assessed with criteria. This is the first sample unit, not a completed professor-replacement course.
+Tab navigates controls. All content is available without audio. Use operating-system dictation in the notes field if preferred. No microphone, gaze tracking, camera, API credential, or generative conversational tutor is included. Quizzes use authored feedback; open explanations are self-assessed with criteria. The capstone supplies a working bounded extractive assistant with source evidence and a trace; it is explicitly distinguished from a trained generative tutor.
 
 Progress and notes use browser local storage and depend on the browser/profile and origin. Download notes to keep a portable text copy. Clearing browser data removes the stored progress. This local server binds to the loopback interface only.
 
@@ -92,9 +126,9 @@ Progress and notes use browser local storage and depend on the browser/profile a
 - Spoken discussion and keyboard coding; Python refresher; mathematics refreshed as needed.
 - Windows system verified: approximately 64 GB RAM, Intel i9-13900K, NVIDIA RTX 4090 with 24 GB VRAM. Local Qwen narration runs on CUDA.
 - Optional budget ceiling: $100/month, not spending authorization. Current app has no paid integrations.
-- First deliverable: accessible app with a complete sample unit. Eye tracking deferred.
+- Original sample expanded to all 13 units. Eye tracking deferred.
 
-The broader roadmap is in COURSE-DESIGN.md. Future work includes a conversational voice teacher grounded in the curriculum, more units, full coding labs, and accessibility validation with the learner's actual magnification and audio setup.
+Further development includes a generative conversational voice teacher grounded in the curriculum, larger model-training projects, and accessibility validation with the learner's actual magnification and audio setup. The present labs are small inspectable computations, not substitutes for training a production transformer or benchmarking a distributed cluster.
 
 ## License
 

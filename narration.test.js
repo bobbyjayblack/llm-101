@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {speechParts,LocalNarration} from './narration.js';
 import {lessons} from './course.js';
-import {courseAudioPlan} from './audio-plan.js';
+import {courseAudioPlan,lessonAudioTexts} from './audio-plan.js';
 
 test('pre-render plan covers every lesson segment with identical player text',()=>{
   const plan=courseAudioPlan();const texts=new Set(plan.map(item=>item.text));
-  for(const lesson of lessons)for(const paragraph of lesson.paragraphs)for(const part of speechParts(paragraph))assert.ok(texts.has(part));
+  for(const lesson of lessons)for(const text of lessonAudioTexts(lesson))for(const part of speechParts(text))assert.ok(texts.has(part));
   assert.equal(texts.size,plan.length);
   assert.ok(plan.every(item=>item.text.length<=260));
 });

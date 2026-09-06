@@ -14,7 +14,8 @@ test('web server preserves static allowlist and protects speech endpoint',async(
   try{
     assert.equal((await request('/')).status,200);
     assert.equal((await request('/narration.js')).status,200);
-    for(const path of ['/audio_service.py','/.models/base/config.json','/.audio/voices/claire.wav','/AGENTS.md'])assert.equal((await request(path)).status,404);
+    for(const path of ['/labs.js','/audio-plan.js'])assert.equal((await request(path)).status,200);
+    for(const path of ['/labs.mjs','/audio_service.py','/.models/base/config.json','/.audio/voices/claire.wav','/AGENTS.md'])assert.equal((await request(path)).status,404);
     assert.equal((await request('/',{headers:{Host:'attacker.example'}})).status,403);
     assert.equal((await request('/api/audio/speech',{method:'POST',headers:{Origin:'https://attacker.example','Content-Type':'application/json'},body:'{}'})).status,403);
     assert.equal((await request('/api/audio/speech',{method:'POST',body:'{}'})).status,415);

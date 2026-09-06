@@ -1,6 +1,6 @@
-# Generative AI Systems: course design draft
+# Generative AI Systems: course design
 
-Status: Unit 1 is implemented as a local browser app with six introductory lessons, Qwen3-TTS narration with passage highlighting and timed word underlining, three original synthetic voices, an optional browser-voice fallback, an experiment, authored quiz feedback, notes, and self-review criteria. Windows launchers manage the web and audio services together. The complete course and conversational voice tutor are still future work. See README.md for launch instructions and saved learner preferences.
+Status: All 13 units are implemented in the local browser app as 30 lessons and 13 runnable labs, with Qwen3-TTS narration, timed word underlining, quizzes with explanations, oral self-check criteria, spaced recall, and saved notes. Unit 1 retains the original six lessons; every subsequent unit has two lessons. Labs run locally in the browser or through `node labs.mjs <unit> <scenario>`. They are small deterministic exercises with expected results and failure scenarios. The capstone is a source-grounded extractive assistant; a generative conversational voice tutor remains future work. Windows launchers manage the web/audio services and resumable narration preparation. See README.md for the curriculum table, launch instructions, and saved learner preferences.
 
 Confirmed direction: deep understanding and comparison; 3–5 hours weekly; large synchronized text and audio; magnification; spoken discussion and keyboard coding; Python refresher and mathematics as needed. VSR means Video Super-Resolution, with specialization depth to be chosen after the introduction. The inspected Windows computer has approximately 64 GB RAM and an RTX 4090. Optional services budget is up to $100 monthly; no spending has been authorized or incurred. Eye tracking is deferred.
 
@@ -26,7 +26,7 @@ A typical session, adjustable after a sample lesson:
 
 Progression requires explanation, application, and diagnosis of an unfamiliar example. Hints and reference answers remain available; the system distinguishes assisted practice from independent mastery. No speed-based grading.
 
-## Provisional sequence
+## Curriculum sequence
 
 1. **Orientation and the complete system.** Model versus application; tokens and representations; training versus inference; data-to-deployment walkthrough. Lab: trace a request through a tiny inspectable system.
 2. **Mathematics and numerical computing as needed.** Vectors, matrices, probability, derivatives, gradients, numerical precision, and tensors. Lab: implement and inspect a small predictor.

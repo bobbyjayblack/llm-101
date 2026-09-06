@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-LLM 101 is an audio-first introductory AI course implemented with plain HTML, CSS, and JavaScript. Six lessons are available; the complete curriculum and conversational tutor are future work. Read README.md and COURSE-DESIGN.md before changing course behavior.
+LLM 101 is an audio-first AI course implemented with plain HTML, CSS, and JavaScript. All 13 units contain 30 lessons and 13 runnable labs. The capstone is a bounded extractive assistant; a generative conversational tutor remains future work. Read README.md and COURSE-DESIGN.md before changing course behavior.
 
 ## Development
 
@@ -10,7 +10,7 @@ LLM 101 is an audio-first introductory AI course implemented with plain HTML, CS
 - Run `npm test` for the existing Node.js test suite.
 - Check changed JavaScript with `node --check <file>`.
 - There is no frontend build step or Node runtime dependency. Qwen narration uses a separate Python/CUDA environment; setup-audio.ps1 installs it. Keep that environment isolated in .venv and model/audio files out of Git.
-- Keep lesson content and training mathematics in course.js, interface behavior in app.js, markup in index.html, styling in style.css, and serving in server.mjs.
+- Keep lesson content and the original training mathematics in course.js, unit exercises in labs.js (shared by the browser and labs.mjs), interface behavior in app.js, markup in index.html, styling in style.css, and serving in server.mjs. Preserve original lesson indices 0–5 for existing notes and bookmarks.
 - The server deliberately exposes only an explicit allowlist of files and binds to loopback. Preserve those boundaries unless a hosting change is requested.
 - start.bat/service.ps1 manage both the web server and audio_service.py. Stop only this directory's matching processes, preserve readiness checks, and leave Ollama and unrelated GPU processes alone.
 - Qwen VoiceDesign creates synthetic references during setup; the Base model serves narration offline. Preserve narrator identity across passages, cache invalidation, bounded requests, and explicit browser-voice fallback.

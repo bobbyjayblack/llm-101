@@ -3,8 +3,10 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname} from 'node:path';
+import {courseAudioPlan} from './audio-plan.js';
 
-const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/course.js':'course.js','/narration.js':'narration.js'};
+const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/course.js':'course.js','/narration.js':'narration.js','/labs.js':'labs.js','/audio-plan.js':'audio-plan.js'};
+const planId=createHash('sha256').update(JSON.stringify(courseAudioPlan())).digest('hex');
 const types={html:'text/html',css:'text/css',js:'text/javascript'};
 const appId=createHash('sha256').update(dirname(fileURLToPath(import.meta.url)).toLowerCase()).digest('hex').slice(0,16);
 function json(res,code,body){res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));}
@@ -15,7 +17,7 @@ export function createCourseServer(){
     const route=new URL(req.url,'http://127.0.0.1:4173').pathname;
     if(route==='/health'&&req.method==='GET')return json(res,200,{service:'llm101-web',appId});
     if(route==='/api/audio/preparation'&&req.method==='GET'){
-      try{return json(res,200,JSON.parse(await readFile(new URL('.service/prerender-claire.json',import.meta.url),'utf8')));}
+      try{const progress=JSON.parse(await readFile(new URL('.service/prerender-claire.json',import.meta.url),'utf8'));return json(res,200,progress.planId===planId?progress:{state:'not-started'});}
       catch{return json(res,200,{state:'not-started'});}
     }
     if(route==='/api/audio/status'&&req.method==='GET'){

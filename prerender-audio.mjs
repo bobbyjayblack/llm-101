@@ -10,7 +10,7 @@ const appId=createHash('sha256').update(root.toLowerCase()).digest('hex').slice(
 const plan=courseAudioPlan();
 const voice=process.argv[2]||'claire';
 if(!['claire','grace','helen'].includes(voice))throw new Error('Unknown narrator');
-const status={voice,state:'rendering',completed:0,total:plan.length};
+const status={voice,state:'rendering',completed:0,total:plan.length,planId:createHash('sha256').update(JSON.stringify(plan)).digest('hex')};
 const target=new URL(`.service/prerender-${voice}.json`,import.meta.url);
 async function save(){
   await mkdir(new URL('.service/',import.meta.url),{recursive:true});

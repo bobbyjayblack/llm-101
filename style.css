@@ -61,3 +61,10 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 .sidebar-compact .course-sidebar .lesson-nav{gap:.4rem}
 @media(max-width:480px){.app-header{gap:.25rem;padding:.35rem}.app-header h1{font-size:.7rem}.app-header .player{gap:.15rem}.course-layout{gap:.3rem}}
 ::highlight(spoken-word){text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:currentColor;text-decoration-thickness:.12em;text-underline-offset:.18em}
+#unit-select{margin-bottom:1rem;max-width:100%}
+#unit-lab{border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem}
+#unit-lab select,#lab-query{display:block;width:100%;max-width:100%;margin:.5rem 0 1rem;background:var(--bg);color:var(--ink);border:1px solid var(--border);padding:.5rem}
+#lab-result{overflow-wrap:anywhere;white-space:pre-wrap}
+.sidebar-compact #unit-select{font-size:.65rem;padding:.1rem;min-height:48px}
+.sidebar-compact label[for=unit-select]{font-size:.6rem;overflow-wrap:anywhere}
+.sidebar-compact #prepare-lesson{font-size:.6rem;padding:.15rem;width:100%;overflow-wrap:anywhere}

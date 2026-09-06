@@ -1,5 +1,7 @@
-import {lessons,trainingResult,trainingStep} from './course.js';
+import {lessons,units,trainingResult,trainingStep} from './course.js';
 import {LocalNarration,speechParts} from './narration.js';
+import {labs,runLab,labNarration} from './labs.js';
+import {lessonAudioTexts} from './audio-plan.js';
 const $=id=>document.getElementById(id);
 const key='ai-understood-v1';
 let state={lesson:0,passage:0,notes:{},reviewed:{},answers:{},size:'24',theme:'dark',rate:'1.3',voice:'',follow:false,engine:'local',localVoice:'claire'};
@@ -77,7 +79,8 @@ function read(index=current,single=false){
 }
 function render(focus=false){
   halt();const l=lessons[state.lesson];
-  $('lessons').replaceChildren(...lessons.map((item,i)=>{
+  $('unit-select').value=String(l.unit);
+  $('lessons').replaceChildren(...lessons.map((item,i)=>({item,i})).filter(({item})=>item.unit===l.unit).map(({item,i})=>{
     const b=document.createElement('button');
     const label=`Lesson ${i+1}: ${item.title}${state.reviewed[i]?' · reviewed':''}`;
     b.setAttribute('aria-label',label);b.title=label;
@@ -86,7 +89,7 @@ function render(focus=false){
     b.append(number,title);if(i===state.lesson)b.setAttribute('aria-current','step');
     b.onclick=()=>{state.lesson=i;current=0;render(true);};return b;
   }));
-  $('lesson-meta').textContent=`LESSON ${state.lesson+1} OF ${lessons.length}`;$('title').textContent=l.title;$('objective').textContent=l.goal;
+  $('lesson-meta').textContent=`UNIT ${l.unit} OF ${units.length} · ${units[l.unit-1].title} · LESSON ${state.lesson+1} OF ${lessons.length}`;$('title').textContent=l.title;$('objective').textContent=l.goal;
   $('current-lesson').textContent=`${state.lesson+1}. ${l.title}`;
   $('passages').replaceChildren(...l.paragraphs.map((text,i)=>{const div=document.createElement('div');div.className='passage';const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.textContent=`Read from passage ${i+1}`;b.onclick=()=>read(i);div.append(p,b);return div;}));
   if(l.code){const pre=document.createElement('pre');pre.textContent=l.code;$('passages').append(pre);}
@@ -94,6 +97,16 @@ function render(focus=false){
   $('choices').innerHTML='<legend>Choose an answer</legend>';
   l.options.forEach((text,i)=>{const label=document.createElement('label');const input=document.createElement('input');input.type='radio';input.name='answer';input.value=i;input.checked=state.answers[state.lesson]===i;input.onchange=()=>{state.answers[state.lesson]=i;save();$('feedback').textContent='';};label.append(input,document.createTextNode(text));$('choices').append(label);});
   $('feedback').textContent='';$('explanation').textContent=l.explanation;$('prompt').textContent=l.prompt;$('rubric').textContent=l.rubric;$('notes').value=state.notes[state.lesson]||'';
+  const lab=labs.find(item=>item.unit===l.unit);
+  $('lab-title').textContent=lab.title;$('lab-task').textContent=lab.task;
+  $('lab-scenario').replaceChildren(...lab.scenarios.map((label,i)=>{const option=document.createElement('option');option.value=i;option.textContent=label;return option;}));
+  $('lab-query-label').hidden=!lab.query;$('lab-query').value='Where do notes save?';
+  $('lab-result').textContent='Choose a scenario, predict the result, then select Run lab.';$('read-lab-result').disabled=true;
+  $('lab-expected').textContent=lab.expected;$('lab-troubleshooting').textContent=lab.troubleshooting;$('lab-solution').open=false;
+  $('lab-command').textContent=`node labs.mjs ${l.unit} 0`;
+  $('lesson-recall').textContent=l.recall||'In three days, explain this lesson without notes, then compare with the self-check criteria. Repeat after one week with a new example.';
+  $('unit-reference').href=units[l.unit-1].reference;
+  $('previous').disabled=state.lesson===0;
   $('complete').textContent=state.reviewed[state.lesson]?'Reviewed · review again anytime':'Mark lesson reviewed';$('next').disabled=state.lesson===lessons.length-1;
   $('progress').textContent=`${Object.keys(state.reviewed).length} of ${lessons.length} lessons marked reviewed. Your place and notes save automatically on this browser.`;
   const stamps=Object.values(state.reviewed).map(Number).filter(Number.isFinite);
@@ -126,6 +139,14 @@ $('read-feedback').onclick=()=>readExtra($('feedback').textContent||'Choose an a
 $('read-prompt').onclick=()=>readExtra(lessons[state.lesson].prompt,[$('prompt')]);
 $('read-criteria').onclick=()=>{$('rubric').closest('details').open=true;readExtra(lessons[state.lesson].rubric,[$('rubric')]);};
 $('read-result').onclick=()=>readExtra($('result').textContent,[$('result')]);
+$('run-lab').onclick=()=>{
+  halt();try{const result=runLab(lessons[state.lesson].unit,Number($('lab-scenario').value),$('lab-query').value);$('lab-result').textContent=labNarration(result);$('read-lab-result').disabled=false;status('Lab finished. Compare your prediction with the result and explanation.');}
+  catch(error){$('lab-result').textContent=error.message;$('read-lab-result').disabled=true;}
+};
+$('read-lab-task').onclick=()=>readExtra($('lab-task').textContent,[$('lab-task')]);
+$('read-lab-result').onclick=()=>readExtra($('lab-result').textContent,[$('lab-result')]);
+$('read-lab-solution').onclick=()=>{$('lab-solution').open=true;readExtra($('lab-expected').textContent+' '+$('lab-troubleshooting').textContent,[$('lab-expected'),$('lab-troubleshooting')]);};
+$('read-recall').onclick=()=>readExtra($('lesson-recall').textContent,[$('lesson-recall')]);
 $('play').onclick=()=>read();$('replay').onclick=()=>read(current,true);$('stop').onclick=()=>{halt();status('Stopped. Read lesson resumes from this passage.');};
 $('pause').onclick=async()=>{if(!speaking)return;paused=!paused;try{if(state.engine==='local')await localNarration.setPaused(paused);else if(paused)synth.pause();else synth.resume();status(paused?'Paused. Select Resume to continue.':'Narration resumed.');}catch{halt();status('Playback could not resume. Select Play to try again.');}};
 $('restart').onclick=()=>read(0);
@@ -135,6 +156,9 @@ $('notes').oninput=()=>{state.notes[state.lesson]=$('notes').value;save();};
 $('check').onclick=()=>{const answer=state.answers[state.lesson];$('feedback').textContent=answer===undefined?'Choose an answer first.':answer===lessons[state.lesson].correct?'Correct. '+lessons[state.lesson].explanation:'Revisit this idea. '+lessons[state.lesson].explanation;};
 $('complete').onclick=()=>{state.reviewed[state.lesson]=Date.now();render();};
 $('next').onclick=()=>{if(state.lesson<lessons.length-1){state.lesson++;current=0;render(true);}};
+$('previous').onclick=()=>{if(state.lesson>0){state.lesson--;current=0;render(true);}};
+$('unit-select').replaceChildren(...units.map(unit=>{const option=document.createElement('option');option.value=unit.id;option.textContent=`${unit.id}. ${unit.title}`;return option;}));
+$('unit-select').onchange=()=>{state.lesson=lessons.findIndex(lesson=>lesson.unit===Number($('unit-select').value));current=0;render(true);};
 function sidebar(){
   const compact=Boolean(state.sidebarCompact);
   document.querySelector('.course-layout').classList.toggle('sidebar-compact',compact);
@@ -183,7 +207,7 @@ $('prepare-lesson').onclick=async()=>{
   if(preparation){halt();status('Audio preparation stopped. Completed segments remain saved.');return;}
   if(state.engine!=='local'){status('Select Local AI narrator in settings to prepare lesson audio.');return;}
   halt();const controller=new AbortController();preparation=controller;
-  const texts=lessons[state.lesson].paragraphs.flatMap(text=>speechParts(text));
+  const texts=[...new Set(lessonAudioTexts(lessons[state.lesson]).flatMap(text=>speechParts(text)))];
   $('prepare-lesson').textContent='Cancel audio preparation';
   try{
     for(let i=0;i<texts.length;i++){
