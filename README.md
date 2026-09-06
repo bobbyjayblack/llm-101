@@ -2,7 +2,7 @@
 
 An audio-first course for a software engineering graduate seeking understanding of AI systems. All 13 curriculum units are available as 30 lessons, with 13 runnable labs, explained quizzes, oral self-checks, spaced recall prompts, notes, and local progress.
 
-See the [project wiki](https://github.com/bobbyjayblack/llm-101/wiki) for getting started, narration and word underlining, troubleshooting, and development guides.
+See the [project wiki](https://github.com/bobbyjayblack/llm-101/wiki), including the [full curriculum and labs](https://github.com/bobbyjayblack/llm-101/wiki/Curriculum-and-labs), [narration guide](https://github.com/bobbyjayblack/llm-101/wiki/Narration-and-word-underlining), and [troubleshooting](https://github.com/bobbyjayblack/llm-101/wiki/Troubleshooting).
 
 ## Start
 
@@ -25,6 +25,18 @@ Double-click `start.bat` to run both services in the background and open the cou
 You can also run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\service.ps1 start` (or `stop`) from this directory. The batch files apply that execution-policy setting only to their PowerShell process; they do not change your system policy. Logs are written to `.service/`, which Git ignores. The stop launcher targets only servers started by these launchers for this directory. If you used `npm start`, stop that server with Ctrl+C in its terminal first.
 
 The web service binds to `127.0.0.1:4173`; Qwen's Python audio service binds to `127.0.0.1:4174`. Ollama is not needed for this TTS workflow and is not started or stopped by these scripts. Only this project's processes are managed. A failed start cleans up services it launched; it does not terminate unrelated processes occupying either port.
+
+## Update an existing installation
+
+From this directory in PowerShell:
+
+```powershell
+.\stop.bat
+git pull --ff-only origin main
+.\start.bat
+```
+
+Preserve any local source edits before pulling, then refresh the course page after startup. Restarting loads the current server modules and narration inventory. Existing voices and unchanged recordings are reused; new lessons are prepared in the background. Browser notes and progress are independent of Git. Use **Download notes & progress** before changing browser profiles or clearing browser data; this exports a text copy, and the app does not currently import it.
 
 ## Local narrator
 
@@ -82,13 +94,25 @@ node labs.mjs 3 1
 node labs.mjs 13 0 Where do notes save?
 ```
 
-Arguments are unit number (1–13), scenario (0 or 1), and an optional question. Edit `labs.js` to extend the examples, then run `npm test`. The speech latency inputs and large-model memory budgets are illustrative calculations, not measured performance. The nonlinear network and low-rank fitting exercises perform actual local optimization.
+Arguments are unit number (1–13), scenario (0 or 1), and an optional question used by units 9 and 13. Invalid units, scenarios, and questions longer than 500 characters are rejected. Edit `labs.js` to extend the examples, then run `npm test`. The speech latency inputs and large-model memory budgets are illustrative calculations, not measured performance. The nonlinear network and low-rank fitting exercises perform actual local optimization.
+
+A study session can follow this sequence: read the lesson, predict and run both lab scenarios, check the quiz explanation, then explain the mechanism in the notes field using the self-check criteria. **Mark lesson reviewed** records your own review; it neither grades an oral answer nor unlocks another lesson. Return after three days and one week using the recall prompt. Labs reset when you change lessons; record results you want to retain in your notes.
 
 ## Development checks
 
 Run `npm test` for content, numerical labs, playback-state, and HTTP-boundary tests, and `.venv\Scripts\python.exe -m unittest audio_service_test alignment_test` for speech and alignment validation. For real-model checks with both services running, run `.venv\Scripts\python.exe checks\audio-smoke.py`; it saves preview WAVs and timings under `.service/`. For browser integration checks, run `npm ci` and `npm run test:browser` with Google Chrome installed. This checks real narration plus all 30 lessons, 26 lab scenarios, quiz feedback, navigation, and progress persistence. Playwright is a development dependency only.
 
 After preparing lesson 1, run `node checks/playback-latency.mjs` to measure actual browser playback onset and segment transitions at 1.3x, and verify speed migration and preference persistence. `node checks/verify-prerender.mjs` checks every planned recording through the live speech endpoint once preparation is complete.
+
+Run `node checks/new-content-audio.mjs` with both services running to check actual local narration and word underlining for a unit-2 lesson and lab instructions, including pause/resume/stop. This check can take longer when those clips have not yet been generated.
+
+To read the current background preparation status without starting a generation request:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:4173/api/audio/preparation
+```
+
+`rendering` reports completed segments and the total; `ready` reports that the worker finished the current plan. `error` requires inspecting the worker log and retrying startup. `not-started` means there is no matching progress record for this server's content plan. A ready narrator means the audio service is available, which is separate from the course recordings being fully prepared.
 
 Run `.venv\Scripts\python.exe -m unittest alignment_test` for alignment-path and number/punctuation handling checks. After course preparation, `node checks/verify-word-timings.mjs` checks word coverage, timestamp ordering, recording bounds, and response times for every course clip.
 

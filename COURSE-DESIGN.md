@@ -12,19 +12,19 @@ The course is designed for a software engineering graduate. Programming knowledg
 
 ## Teaching approach
 
-Each lesson supplies its own explanation, terminology, worked example, experiment, feedback, and review. No external textbook or professor should be required to complete the planned course. References support verification and optional depth. An AI tutor should be grounded in reviewed course content and lab evidence; it must identify uncertainty and distinguish established material from generated explanations.
+Each lesson supplies teaching text, a quiz with explanatory feedback, an oral prompt, self-check criteria, and recall guidance. Lessons in the same unit share its runnable lab and both scenarios. References support verification and optional depth. The current assistant returns authored evidence; a future generative tutor should be grounded in reviewed course content and lab evidence and distinguish established material from generated explanations.
 
 A typical session, adjustable after a sample lesson:
 
 1. State one concrete learning objective and recall a previous idea aloud.
-2. Listen to a short explanation, initially targeting five to eight minutes per segment.
+2. Read or listen to a short passage, pausing and replaying as needed. Audio request segments are shorter than a complete lesson.
 3. Hear a worked example with all essential visual information described.
 4. Predict an outcome before running a small experiment.
 5. Explain the result verbally or in writing; receive specific feedback.
 6. Solve a related problem with less assistance.
-7. Save a short spoken recap and schedule later retrieval practice.
+7. Save a recap in the notes field, using typing or operating-system dictation, and return for the suggested recall sessions. The app does not record microphone audio or send reminders.
 
-Progression requires explanation, application, and diagnosis of an unfamiliar example. Hints and reference answers remain available; the system distinguishes assisted practice from independent mastery. No speed-based grading.
+The learning target is explanation, application, and diagnosis of an unfamiliar example. Reference answers remain available. Review is self-assessed: the app stores a review date but does not certify mastery, record whether assistance was used, or gate progression. There is no speed-based grading.
 
 ## Curriculum sequence
 
@@ -33,18 +33,20 @@ Progression requires explanation, application, and diagnosis of an unfamiliar ex
 3. **Learning from data.** Objectives, optimization, backpropagation, generalization, splits, leakage, overfitting, and baselines. Lab: train a small network and diagnose deliberate mistakes.
 4. **Data sourcing and preparation.** Provenance, permissions and licenses, privacy, collection, filtering, deduplication, labeling, synthetic data, contamination, dataset documentation, and versioning. Lab: create a documented small dataset and leakage checks. Specific legal requirements require jurisdiction-specific sources.
 5. **Language modeling foundations.** Tokenization, embeddings, sequence prediction, attention, positional information, transformers, and architecture families. Lab: build and train a tiny language model.
-6. **Training at scale.** Pretraining, optimizers, batching, precision, checkpoints, distributed training, parallelism, hardware constraints, and experiment tracking. Lab: measure a small training run; model larger costs without requiring a large cluster.
+6. **Training at scale.** Pretraining, optimizers, batching, precision, checkpoints, distributed training, parallelism, hardware constraints, and experiment tracking. Lab: calculate batch and parameter-state memory, then compare momentum training resumed with and without optimizer state. Cluster training remains a conceptual topic.
 7. **Adaptation and post-training.** Supervised fine-tuning, parameter-efficient methods, preference learning, reinforcement learning concepts, distillation, and alignment evaluation. Lab: adapt a small model and compare it against its baseline.
-8. **Inference and serving.** Decoding, context limits, KV caches, batching, quantization, speculative decoding concepts, latency, throughput, memory, and cost. Lab: benchmark and explain tradeoffs on available hardware.
+8. **Inference and serving.** Decoding, context limits, KV caches, batching, quantization, speculative decoding concepts, latency, throughput, memory, and cost. Lab: calculate KV-cache memory at two context lengths and quantify weight reconstruction error. These are estimates and arithmetic, not hardware latency benchmarks.
 9. **Retrieval and application systems.** Embeddings, vector search, retrieval-augmented generation, reranking, tools, structured outputs, workflow orchestration, agents, memory, and failure recovery. Lab: build a source-grounded assistant with an evaluation set.
-10. **Speech systems.** Audio representations, speech recognition, text-to-speech, speech generation, streaming, interruption handling, and voice interfaces. Lab: trace and evaluate a voice interaction.
+10. **Speech systems.** Audio representations, speech recognition, text-to-speech, speech generation, streaming, interruption handling, and voice interfaces. Lab: compute transcript word error rate, waveform storage, and an illustrative stage-latency budget. The course's real narration controls support a separate interruption exercise; the lab does not transcribe microphone input.
 11. **Image, video, and multimodal generation, including VSR.** Autoencoders, GANs, diffusion, flow-based generation concepts, conditioning, vision-language models, temporal consistency, and multimodal evaluation. VSR introduces temporal evidence, alignment, propagation, upsampling, degradation assumptions, fidelity, and perceptual quality; deeper specialization follows learner feedback. Labs use spoken descriptions and numeric evidence so essential conclusions do not depend on vision.
-12. **Reliable production systems.** Evaluation design, hallucination analysis, prompt injection, access boundaries, observability, caching, deployment, monitoring, reproducibility, and update policies. Lab: test and instrument the integrated application.
+12. **Reliable production systems.** Evaluation design, hallucination analysis, prompt injection, access boundaries, observability, caching, deployment, monitoring, reproducibility, and update policies. Lab: run authored acceptance cases against the extractive assistant, compute a percentile over illustrative durations, and demonstrate a stale cache key.
 13. **Capstone and oral defense.** Build an accessible AI teaching assistant or another learner-selected system; document data lineage, model selection, training or adaptation, inference architecture, evaluation, costs, and limitations. Explain and debug the whole system.
 
 For each major technique, teach the problem it solves, its inputs and outputs, internal mechanism, training objective where applicable, inference behavior, resource tradeoffs, failure modes, and role in the larger architecture.
 
-## Accessibility requirements for implementation
+## Accessibility design targets
+
+These targets include work requiring further validation. Implemented controls and completed checks are recorded in VERIFICATION.md; full screen-reader conformance and testing with the learner's magnification setup are not yet established.
 
 - Audio-first instruction with equivalent complete text; optional synchronized highlighting, adjustable speech rate, pause/resume, sentence replay, bookmarks, and resume position.
 - Complete keyboard navigation, visible focus, meaningful headings, labeled controls, configurable large text and contrast, and screen-reader compatibility tested with the learner's actual setup.
@@ -64,4 +66,4 @@ Every unit needs full narrated teaching material, an accessible transcript, a ru
 - Institute of Education Sciences, Organizing Instruction and Study to Improve Student Learning: https://ies.ed.gov/ncee/wwc/practiceguide/1 — supports spaced learning, worked examples interleaved with problems, retrieval, and explanatory questions. These are design starting points, not a guarantee about an individual adult learner.
 - W3C Web Accessibility Initiative, Making Audio and Video Media Accessible: https://www.w3.org/WAI/media/av/ — guidance for transcripts, descriptions, and accessible media players.
 
-Technical readings and implementation dependencies will be selected and verified after scope clarification. The final course should distinguish stable principles from changing products and model versions.
+Each unit links an optional technical reference through `course.js`; README.md documents the implemented exercises, and THIRD-PARTY.md identifies downloaded model and package notices. Larger training projects, a generative conversational tutor, and further accessibility validation remain extensions to the current course.

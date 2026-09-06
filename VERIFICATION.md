@@ -2,6 +2,12 @@
 
 Checked on 2026-09-06.
 
+## Documentation refresh
+
+Updated README, course design, contributor instructions, and the wiki to describe the implemented study workflow, lab limits, text-only note export, installation updates, and current-plan audio preparation states. Design targets are distinguished from completed accessibility checks and self-reviewed progress. The course's source code, voice configuration, and audio inventory were unchanged in this documentation update.
+
+The 19 Node tests passed again. Checked five relative file links and 18 internal wiki links across 14 Markdown documents. Published the corresponding wiki updates; all six live pages returned HTTP 200. No new browser, acoustic, or Python verification was needed for these documentation-only edits. Earlier test results below retain their original scope.
+
 ## Full curriculum implementation
 
 All 13 units now contain 30 lessons (the original six plus 24 new lessons), with approximately 10,900 words of teaching text, lesson quizzes and explanations, oral prompts and criteria, and spaced recall. Each unit has a runnable local lab with two scenarios, expected results, troubleshooting, source inspection, and a Node CLI. Units 9 and 13 accept questions against a small authored source collection. The capstone is a deterministic extractive assistant, not a generative conversational tutor.
@@ -17,7 +23,7 @@ Reproduce curriculum UI checks with `npm run test:browser`, and the new lesson/l
 
 ## Project wiki
 
-Published Home, Getting started, Narration and word underlining, Troubleshooting, and Development and verification, with a sidebar and license footer. All five live pages returned HTTP 200; 11 internal wiki links resolved to authored pages. The GitHub-rendered home page, five-page navigation, and footer were inspected. README now links to the wiki.
+The current wiki contains Home, Getting started, Curriculum and labs, Narration and word underlining, Troubleshooting, and Development and verification, with a sidebar and license footer. The documentation refresh above checked all six published pages. At initial publication, the original five pages and 11 internal links were checked, and the GitHub-rendered home, navigation, and footer were inspected. The full-curriculum release added Curriculum and labs.
 
 ## Word underlining
 
