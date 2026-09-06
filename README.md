@@ -14,6 +14,12 @@ npm start
 
 Open http://127.0.0.1:4173 in a browser. No dependency installation, API keys, GPU, or paid services are required. Run `npm test` for content and training-example checks. Stop the server with Ctrl+C. On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`.
 
+## Windows start and stop shortcuts
+
+With Node.js installed, double-click `start.bat` in this directory to run the web service in the background, then open http://127.0.0.1:4173. Double-click `stop.bat` to stop it. These launchers work from any working directory, including paths containing spaces. Starting twice leaves the existing server running; stopping twice is harmless.
+
+You can also run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\service.ps1 start` (or `stop`) from this directory. The batch files apply that execution-policy setting only to their PowerShell process; they do not change your system policy. Logs are written to `.service/`, which Git ignores. The stop launcher targets only servers started by these launchers for this directory. If you used `npm start`, stop that server with Ctrl+C in its terminal first.
+
 ## Project files
 
 - `index.html` and `style.css`: accessible course interface and themes.
@@ -21,6 +27,7 @@ Open http://127.0.0.1:4173 in a browser. No dependency installation, API keys, G
 - `course.js`: six lessons and the toy training model.
 - `course.test.js`: lesson structure and training arithmetic checks.
 - `server.mjs`: dependency-free local HTTP server on port 4173.
+- `start.bat`, `stop.bat`, and `service.ps1`: Windows background service controls.
 - [COURSE-DESIGN.md](COURSE-DESIGN.md): broader curriculum and accessibility goals.
 - [VERIFICATION.md](VERIFICATION.md): recorded checks and remaining validation.
 - [AGENTS.md](AGENTS.md): repository instructions for coding agents and contributors.

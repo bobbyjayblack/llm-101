@@ -2,6 +2,19 @@
 
 Checked on 2026-09-06.
 
+## Windows service launchers
+
+Checked on 2026-09-06 after adding start.bat, stop.bat, and service.ps1:
+
+- Started the background server and received HTTP 200 from the course page.
+- Repeated start detected the running server; stop ended it; repeated stop succeeded without an error.
+- A second directory's launcher rejected the occupied port, and its stop command left the original directory's server running.
+- Started and stopped a copy in a path containing spaces while using a different working directory.
+- All three existing Node tests passed. Test servers were stopped after verification.
+- Batch launchers were executed from a terminal; Explorer double-click interaction was not separately tested.
+
+## Course application
+
 - Node tests: the first update matches the narrated worked example; repeated updates decrease loss from both sides of the solution; each lesson has teaching, a valid quiz answer, explanation, and self-check criteria.
 - JavaScript syntax checks pass.
 - In-app browser: six lessons render; navigation works; the interactive training step displays weight 1.800, prediction 3.600, and loss 2.880; selecting the correct answer produces explanatory feedback.
