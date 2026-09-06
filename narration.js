@@ -51,7 +51,7 @@ export class LocalNarration {
     try{
       for(let index=0;index<entries.length;index++){
         if(!active())return;
-        onStatus('Preparing local narration. The first reading may take a moment.');
+        onStatus('Loading narration...');
         const result=await pending;
         if(!active())return;if(result.error)throw result.error;
         if(index+1<entries.length)pending=request(entries[index+1]);

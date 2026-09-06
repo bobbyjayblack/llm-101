@@ -10,6 +10,7 @@ try{
   await page.getByText('Local narrator is ready.',{exact:true}).waitFor({state:'attached'});
   await page.getByRole('button',{name:'Reading and audio settings',exact:true}).click();
   assert.equal(await page.locator('#engine').inputValue(),'local');
+  assert.equal(await page.locator('#rate').inputValue(),'1.3');
   assert.equal(await page.locator('#voice option').count(),3);
   await page.locator('#voice').selectOption('claire');
   await page.getByRole('button',{name:'Preview voice',exact:true}).click();

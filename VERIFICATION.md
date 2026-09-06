@@ -2,7 +2,19 @@
 
 Checked on 2026-09-06.
 
-Playback-speed update: the default is now 1.5x, with a one-time migration for existing settings. A separate headless Chrome context verified the fresh default, migration from 1x, preservation of notes, and persistence of a subsequent manual speed change. All seven Node tests and the app.js syntax check passed. Voice files and pitch-preserving playback behavior were unchanged.
+## 1.3x playback and pre-rendering
+
+The current default and one-time existing-settings migration are 1.3x. A separate headless Chrome context verified migration from the previous 1.5x setting, note preservation, and persistence of a subsequent manual speed choice.
+
+- The exact player-text inventory contains 127 unique segments, including all 84 lesson-reading segments plus static question, feedback, self-check, and preview material. Rendering uses batches of up to four with the existing Claire reference.
+- Completed all 127 Claire recordings (21.1 minutes before playback speed adjustment). A complete HTTP playback sweep returned valid WAVs and cache hits for every segment: median 20 ms, 95th percentile 35 ms, maximum 42 ms.
+- Eight Node tests and five Python tests passed. Coverage includes inventory/player text agreement, cached responses while the model is unavailable, bounded batch input, cancellation, playback progression, and existing course/server checks.
+- Ten cached requests during active GPU rendering completed in 7–50 ms. Saved responses bypass model readiness, generation locks, and queue limits.
+- Actual Chrome audio events measured 164 ms from Play to playback and 16 ms between the first three saved segments at 1.3x. The broader browser integration check passed with real narration and no page errors.
+- Local Whisper transcriptions of nine sampled recordings covering all six lessons matched the intended wording apart from punctuation and number formatting. This is a sampled intelligibility check, not a guarantee for every generated word.
+- Stop terminated the launcher-managed pre-render worker and both services, preserving 32 recordings. Restart reused those files and resumed missing work. Durable `.audio/course/` files are excluded from temporary-cache eviction and Git.
+
+Earlier 1.5x update (superseded by 1.3x above): a separate headless Chrome context verified the fresh default, migration from 1x, preservation of notes, and persistence of a subsequent manual speed change. All seven Node tests and the app.js syntax check passed. Voice files and pitch-preserving playback behavior were unchanged.
 
 ## Local Qwen3-TTS integration
 

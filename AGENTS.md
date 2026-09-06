@@ -14,6 +14,7 @@ LLM 101 is an audio-first introductory AI course implemented with plain HTML, CS
 - The server deliberately exposes only an explicit allowlist of files and binds to loopback. Preserve those boundaries unless a hosting change is requested.
 - start.bat/service.ps1 manage both the web server and audio_service.py. Stop only this directory's matching processes, preserve readiness checks, and leave Ollama and unrelated GPU processes alone.
 - Qwen VoiceDesign creates synthetic references during setup; the Base model serves narration offline. Preserve narrator identity across passages, cache invalidation, bounded requests, and explicit browser-voice fallback.
+- The launcher also manages prerender-audio.mjs. Keep the render plan's text/segmentation identical to playback. Durable course WAVs must bypass GPU locks and survive cache cleanup and interrupted renders. Stop must terminate the render worker as well as both services.
 
 ## Accessibility and learner data
 

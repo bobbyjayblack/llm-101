@@ -7,9 +7,11 @@ $ErrorActionPreference = 'Stop'
 $logDirectory = Join-Path $PSScriptRoot '.service'
 $webScript = Join-Path $PSScriptRoot 'server.mjs'
 $audioScript = Join-Path $PSScriptRoot 'audio_service.py'
+$renderScript = Join-Path $PSScriptRoot 'prerender-audio.mjs'
 $python = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
 $webPattern = '^\s*(?:"[^"]*\\node\.exe"|[^\s"]*node\.exe)\s+"' + [regex]::Escape($webScript) + '"\s*$'
 $audioPattern = '^\s*(?:"[^"]*\\python\.exe"|[^\s"]*python\.exe)\s+-u\s+"' + [regex]::Escape($audioScript) + '"\s*$'
+$renderPattern = '^\s*(?:"[^"]*\\node\.exe"|[^\s"]*node\.exe)\s+"' + [regex]::Escape($renderScript) + '"\s*$'
 $started = @()
 $lock = $null
 $sha = [System.Security.Cryptography.SHA256]::Create()
@@ -62,6 +64,7 @@ try {
     try { $lock = [IO.File]::Open((Join-Path $logDirectory 'launcher.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
     catch { throw 'Another start or stop is in progress. Please wait for it to finish.' }
     if ($Action -eq 'stop') {
+        foreach ($server in @(Find-Servers 'node.exe' $renderPattern)) { Stop-Owned $server $renderPattern }
         foreach ($server in @(Find-Servers 'node.exe' $webPattern)) { Stop-Owned $server $webPattern }
         # A venv Python may have both a launcher and a child; match and stop both.
         foreach ($server in @(Find-Servers 'python.exe' $audioPattern)) { Stop-Owned $server $audioPattern }
@@ -93,7 +96,11 @@ try {
         $started += 'web'
     }
     Wait-Ready 4173 'llm101-web' 15
+    if (@(Find-Servers 'node.exe' $renderPattern).Count -eq 0) {
+        $process = Start-Process -FilePath $node -ArgumentList ('"{0}"' -f $renderScript) -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDirectory 'prerender-stdout.log') -RedirectStandardError (Join-Path $logDirectory 'prerender-stderr.log')
+    }
     Write-Host 'Course and local AI narrator ready at http://127.0.0.1:4173'
+    Write-Host 'Missing Claire narration is prepared in the background; saved recordings play immediately.'
     Write-Host 'Run stop.bat to stop both services and unload the audio model.'
 } catch {
     # Roll back only services this start launched; leave pre-existing processes alone.

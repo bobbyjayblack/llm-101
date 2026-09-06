@@ -2,10 +2,10 @@ import {lessons,trainingResult,trainingStep} from './course.js';
 import {LocalNarration,speechParts} from './narration.js';
 const $=id=>document.getElementById(id);
 const key='ai-understood-v1';
-let state={lesson:0,passage:0,notes:{},reviewed:{},answers:{},size:'24',theme:'dark',rate:'1.5',voice:'',follow:false,engine:'local',localVoice:'claire'};
+let state={lesson:0,passage:0,notes:{},reviewed:{},answers:{},size:'24',theme:'dark',rate:'1.3',voice:'',follow:false,engine:'local',localVoice:'claire'};
 try{const saved=JSON.parse(localStorage.getItem(key));if(saved&&typeof saved==='object')state={...state,...saved};}catch{}
 // Apply the requested faster pace once; later manual speed choices still persist.
-if(!state.narrationSpeedUpdated){state.rate='1.5';state.narrationSpeedUpdated=true;}
+if(state.narrationSpeedVersion!==2){state.rate='1.3';state.narrationSpeedVersion=2;}
 if(!Number.isInteger(state.lesson)||!lessons[state.lesson])state.lesson=0;
 for(const k of ['notes','reviewed','answers'])if(!state[k]||typeof state[k]!=='object')state[k]={};
 let current=Math.max(0,Math.min(Number(state.passage)||0,lessons[state.lesson].paragraphs.length-1));
@@ -122,7 +122,7 @@ function loadVoices(){
   for(const item of options){const option=document.createElement('option');option.value=item.value;option.textContent=item.label;$('voice').append(option);}
   $('voice').value=state.engine==='local'?state.localVoice:state.voice;
   if($('voice').selectedIndex<0){$('voice').selectedIndex=0;if(state.engine==='local')state.localVoice=$('voice').value;}
-  $('voice-note').textContent=state.engine==='local'?'Original AI-designed voices generated on this computer. First readings take time to prepare; replays use saved audio. No text is sent to a cloud speech service.':'Browser and operating-system voices may use online services. No microphone or camera is enabled.';
+  $('voice-note').textContent=state.engine==='local'?'Original AI-designed voices generated on this computer. Saved course audio plays immediately; new text or other voices may need preparation. No text is sent to a cloud speech service.':'Browser and operating-system voices may use online services. No microphone or camera is enabled.';
 }
 $('engine').value=state.engine;
 $('engine').onchange=()=>{halt();state.engine=$('engine').value;loadVoices();save();status('Narrator changed. Select Play to listen.');};
@@ -137,6 +137,13 @@ async function audioHealth(){
   }catch{$('local-audio-status').textContent='Local narrator is unavailable. Run start.bat, or select Browser voices.';}
 }
 $('refresh-audio').onclick=audioHealth;
+async function preparationHealth(){
+  try{
+    const response=await fetch('/api/audio/preparation');const prepared=await response.json();
+    $('prepared-audio-status').textContent=prepared.state==='ready'?'Claire’s course narration is saved for quick playback.':prepared.state==='rendering'?`Saving Claire’s course audio: ${prepared.completed} of ${prepared.total} segments ready.`:prepared.state==='error'?'Course audio preparation paused. Run start.bat to retry; saved passages remain available.':'';
+    if(prepared.state!=='ready')setTimeout(preparationHealth,10000);
+  }catch{setTimeout(preparationHealth,10000);}
+}
 $('prepare-lesson').onclick=async()=>{
   if(preparation){halt();status('Audio preparation stopped. Completed segments remain saved.');return;}
   if(state.engine!=='local'){status('Select Local AI narrator in settings to prepare lesson audio.');return;}
@@ -157,4 +164,4 @@ let weight=1;
 function showResult(){const r=trainingResult(weight);$('result').textContent=`Weight: ${weight.toFixed(3)}. Input: 2. Prediction: ${r.prediction.toFixed(3)}. Target: 6. Loss: ${r.loss.toFixed(3)}.`;}
 $('weight').oninput=()=>{weight=Number($('weight').value);showResult();};$('train').onclick=()=>{weight=trainingStep(weight);$('weight').step='any';$('weight').value=weight;showResult();};$('reset-experiment').onclick=()=>{weight=1;$('weight').value=weight;showResult();};
 $('export').onclick=()=>{const text=['AI, understood — notes and progress',...lessons.map((l,i)=>`\n${i+1}. ${l.title}\nReviewed: ${state.reviewed[i]?new Date(state.reviewed[i]).toLocaleString():'Not yet'}\n${state.notes[i]||'No notes yet.'}`)].join('\n');const url=URL.createObjectURL(new Blob([text],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='ai-understood-notes.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-window.addEventListener('pagehide',halt);appearance();sidebar();loadVoices();showResult();render();audioHealth();
+window.addEventListener('pagehide',halt);appearance();sidebar();loadVoices();showResult();render();audioHealth();preparationHealth();

@@ -14,6 +14,10 @@ export function createCourseServer(){
     if(!['127.0.0.1:4173','localhost:4173'].includes(req.headers.host))return json(res,403,{error:'Local access only.'});
     const route=new URL(req.url,'http://127.0.0.1:4173').pathname;
     if(route==='/health'&&req.method==='GET')return json(res,200,{service:'llm101-web',appId});
+    if(route==='/api/audio/preparation'&&req.method==='GET'){
+      try{return json(res,200,JSON.parse(await readFile(new URL('.service/prerender-claire.json',import.meta.url),'utf8')));}
+      catch{return json(res,200,{state:'not-started'});}
+    }
     if(route==='/api/audio/status'&&req.method==='GET'){
       try{
         const response=await fetch('http://127.0.0.1:4174/health',{signal:AbortSignal.timeout(3000)});

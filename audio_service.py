@@ -38,6 +38,30 @@ def reference_path(voice):
     return AUDIO_DIR / 'voices' / f"{voice['id']}-{voice_version(voice)}.wav"
 
 
+def audio_digest(text, voice):
+    fingerprint = json.dumps([text, voice_version(VOICE_MAP[voice]), 'speech-v1'], ensure_ascii=False)
+    return hashlib.sha256(fingerprint.encode()).hexdigest()
+
+
+def saved_audio(text, voice):
+    digest = audio_digest(text, voice)
+    for folder in ['course', 'cache']:
+        try:
+            return (AUDIO_DIR / folder / f'{digest}.wav').read_bytes()
+        except FileNotFoundError:
+            pass
+    return None
+
+
+def validate_batch(value):
+    if not isinstance(value, dict) or not isinstance(value.get('texts'), list) or not 1 <= len(value['texts']) <= 4:
+        raise ValueError('Provide between 1 and 4 speech segments.')
+    requests = [validate_request({'text': text, 'voice': value.get('voice', 'claire')}) for text in value['texts']]
+    if any(len(text) > 300 for text, _ in requests):
+        raise ValueError('Pre-render segments must be at most 300 characters.')
+    return [text for text, _ in requests], requests[0][1]
+
+
 def validate_request(value):
     if not isinstance(value, dict):
         raise ValueError('Expected a JSON object.')
@@ -132,12 +156,15 @@ class Narrator:
 
     def speech(self, text, voice):
         import torch
-        fingerprint = json.dumps([text, voice_version(VOICE_MAP[voice]), 'speech-v1'], ensure_ascii=False)
-        digest = hashlib.sha256(fingerprint.encode()).hexdigest()
+        cached_audio = saved_audio(text, voice)
+        if cached_audio is not None:
+            return cached_audio, True
+        digest = audio_digest(text, voice)
         path = AUDIO_DIR / 'cache' / f'{digest}.wav'
         with self.lock:
-            if path.exists():
-                return path.read_bytes(), True
+            cached_audio = saved_audio(text, voice)
+            if cached_audio is not None:
+                return cached_audio, True
             log.info('Generating %s: %s characters', voice, len(text))
             torch.manual_seed(int(digest[:8], 16))
             with torch.inference_mode():
@@ -153,9 +180,41 @@ class Narrator:
                 if total <= 1024 ** 3:
                     break
                 if old != path:
-                    total -= old.stat().st_size
-                    old.unlink()
+                    try:
+                        size = old.stat().st_size
+                        old.unlink()
+                        total -= size
+                    except (FileNotFoundError, PermissionError):
+                        pass  # A concurrent cached playback may still have the file open on Windows.
             return path.read_bytes(), False
+
+    def render_batch(self, texts, voice):
+        import torch
+        with self.lock:
+            missing = []
+            for text in dict.fromkeys(texts):
+                path = AUDIO_DIR / 'course' / f'{audio_digest(text, voice)}.wav'
+                audio = saved_audio(text, voice)
+                if audio is None:
+                    missing.append(text)
+                elif not path.exists():
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    temporary = path.with_suffix('.tmp')
+                    temporary.write_bytes(audio)
+                    temporary.replace(path)
+            if missing:
+                log.info('Pre-rendering %s course segments for %s', len(missing), voice)
+                torch.manual_seed(int(audio_digest(missing[0], voice)[:8], 16))
+                with torch.inference_mode():
+                    wavs, sr = self.model.generate_voice_clone(
+                        text=missing, language=['English'] * len(missing),
+                        voice_clone_prompt=self.prompts[voice] * len(missing), max_new_tokens=2048,
+                    )
+                if len(wavs) != len(missing):
+                    raise RuntimeError('The model did not return every requested segment.')
+                for text, samples in zip(missing, wavs):
+                    write_audio(AUDIO_DIR / 'course' / f'{audio_digest(text, voice)}.wav', samples, sr)
+            return {'prepared': len(texts), 'generated': len(missing)}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -196,7 +255,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.allowed():
             return
-        if self.path != '/speech':
+        if self.path not in ('/speech', '/prerender'):
             self.respond(404, {'error': 'Not found.'})
             return
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
@@ -207,11 +266,21 @@ class Handler(BaseHTTPRequestHandler):
             if not 0 < length <= 10000:
                 raise ValueError('Request body is too large or missing.')
             self.connection.settimeout(10)
-            text, voice = validate_request(json.loads(self.rfile.read(length)))
+            value = json.loads(self.rfile.read(length))
+            if self.path == '/prerender':
+                texts, voice = validate_batch(value)
+            else:
+                text, voice = validate_request(value)
         except (ValueError, UnicodeError, TimeoutError) as exc:
             self.respond(400, {'error': str(exc)})
             return
         narrator = self.server.narrator
+        # A saved WAV must never queue behind model loading or GPU generation.
+        if self.path == '/speech':
+            audio = saved_audio(text, voice)
+            if audio is not None:
+                self.respond(200, audio, 'audio/wav', {'X-Audio-Cache': 'hit'})
+                return
         if narrator.status != 'ready':
             self.respond(503, {'error': 'Local narrator is not ready. Run start.bat and check the audio log.'})
             return
@@ -219,8 +288,11 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(429, {'error': 'Narrator is busy. Please try again shortly.'})
             return
         try:
-            audio, cached = narrator.speech(text, voice)
-            self.respond(200, audio, 'audio/wav', {'X-Audio-Cache': 'hit' if cached else 'miss'})
+            if self.path == '/prerender':
+                self.respond(200, narrator.render_batch(texts, voice))
+            else:
+                audio, cached = narrator.speech(text, voice)
+                self.respond(200, audio, 'audio/wav', {'X-Audio-Cache': 'hit' if cached else 'miss'})
         except Exception:
             log.exception('Speech generation failed')
             self.respond(500, {'error': 'Speech generation failed. See .service/audio-stderr.log, then retry.'})
