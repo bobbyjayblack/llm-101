@@ -163,3 +163,33 @@ Free of charge for noncommercial use, modification, and sharing under the custom
 This is source-available software with a noncommercial restriction, rather than an OSI-approved open-source license. See LICENSE.md for the governing terms. Contributions must be offered under the same license.
 
 Third-party models and dependencies retain their own licenses; the project's noncommercial restriction does not replace their terms. See [THIRD-PARTY.md](THIRD-PARTY.md).
+
+## SEO-oriented overview: LLM 101 — learn AI and large language models locally
+
+This section intentionally supports search discoverability while helping learners decide whether the course fits their needs. It describes the actual project for people searching on Google, Bing, DuckDuckGo, and other search engines. Search placement, including a number-one ranking, is not guaranteed.
+
+**LLM 101 is a free-of-charge, audio-first AI course with 30 lessons, 13 curriculum units, and 13 runnable programming labs.** Learn large language model fundamentals, neural networks, transformer attention, data preparation, model training, low-rank adaptation, inference, retrieval-augmented generation concepts, speech systems, and video super-resolution. The course combines explanations, experiments, quizzes with feedback, and review prompts for self-paced study.
+
+### Who is this AI and machine learning course for?
+
+LLM 101 is designed for programmers and software engineering learners who want to understand how AI systems work. It includes a Python and mathematics refresher, then connects model behavior to practical engineering decisions. Small JavaScript labs run in the browser or through Node.js, making the calculations and failure cases available for inspection.
+
+### Can I learn about LLMs without a cloud API or paid subscription?
+
+Yes. The lessons and labs run locally without API credentials or a paid service. The optional Windows narration setup uses Qwen3-TTS for local text-to-speech. The tested narration system has an NVIDIA RTX 4090; browser voices are also available. Ollama is not required for this course's narration or labs.
+
+### Does the course support listening and large text?
+
+The learning interface offers large text, light and dark themes, keyboard controls, adjustable narration speed, and synchronized word underlining. Prepared local audio reduces replay delays. Notes, lesson bookmarks, and self-reviewed progress stay in browser storage. Full assistive-technology conformance has not been established; see the [recorded accessibility and playback checks](VERIFICATION.md).
+
+### What can I build and test?
+
+Train a small nonlinear network, inspect a count-based language model, compare causal attention, diagnose data leakage, fit a low-rank update, estimate KV-cache memory, measure transcript word error rate, and explore motion alignment. The capstone is a bounded extractive teaching assistant that returns authored source evidence. These exercises teach mechanisms; they do not train a production-scale LLM or provide a general conversational tutor.
+
+### Where should I start, and what does “free” mean?
+
+Follow the [installation instructions](#start), browse the [complete curriculum and labs](https://github.com/bobbyjayblack/llm-101/wiki/Curriculum-and-labs), or read the [local narration guide](https://github.com/bobbyjayblack/llm-101/wiki/Narration-and-word-underlining). Use, modification, and sharing are free of charge for noncommercial purposes under the [project license](LICENSE.md). Commercial exploitation is prohibited; the project is source-available with a noncommercial restriction.
+
+### Search visibility and publishing scope
+
+The public [GitHub repository](https://github.com/bobbyjayblack/llm-101) and [project wiki](https://github.com/bobbyjayblack/llm-101/wiki) are the discoverable project resources. The app at `127.0.0.1` runs on the learner's computer and is not a public website. This README section supplies descriptive headings, useful answers, and relevant links; it does not configure GitHub's page metadata, submit pages to search engines, or establish a measured ranking improvement. The approach follows [Google's SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide) and [Bing's Webmaster Guidelines](https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a), which emphasize useful content and discourage keyword stuffing.

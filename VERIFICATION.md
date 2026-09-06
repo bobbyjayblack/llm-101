@@ -2,6 +2,12 @@
 
 Checked on 2026-09-06.
 
+## SEO documentation release
+
+Added an explicitly labeled SEO-oriented overview and learner FAQ at the very bottom of README.md, with accurate course capabilities, links to project resources, license scope, and search-visibility limitations. The wiki home links to this overview and distinguishes the public documentation from the local application. No application, lesson, narration, or hosting behavior changed.
+
+All 19 Node tests passed for this release. Relative documentation links and internal wiki destinations were checked, and Git whitespace checks passed. Search indexing and ranking changes have not been measured; no number-one ranking is claimed.
+
 ## Compact header toggle
 
 Moved the sidebar toggle to an icon immediately left of the LLM 101 header title and removed its separate sidebar panel and visible Collapse label. The icon retains its accessible name, expanded state, keyboard button behavior, and saved compact preference. Updated the browser tab title as well. All 19 Node tests and both browser suites passed, including compact-mode navigation and viewport overflow checks; inspected the updated header screenshot.
