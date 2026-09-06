@@ -4,6 +4,8 @@ Checked on 2026-09-06.
 
 ## Local Qwen3-TTS integration
 
+Claire connected-speech revision, 2026-09-06: retained her soft/whimsical tone description and seed, adding directions for linked word boundaries, reduced unstressed words, and phrase-level emphasis. Regenerated Claire's reference and restarted both services. The same preview measured 9.68 seconds versus 10.40 seconds previously; the saved playback speed was not changed. A local Whisper base.en transcription recovered the intended wording with the same minor "try an"/"try and" ambiguity. Real WAV generation and cache replay passed; Grace and Helen remained cached. Seven Node and three Python tests passed. These checks establish functionality and intelligibility, not a subjective guarantee of improved coarticulation or identical vocal timbre.
+
 Claire tone revision, 2026-09-06: changed her design to a softer, rounded, velvety adult voice with a subtle whimsical lilt and a steady conversational pace. Regenerated only Claire's reference and restarted both services. Her identical preview measured 10.40 seconds versus 10.24 seconds previously (about 1.6% difference); browser speed settings were unchanged. Real synthesis and cached replay passed; Grace and Helen retained their existing audio. Seven Node tests and three Python tests passed. Voice-version hashing prevents the previous Claire recordings from being reused for new requests. Subjective softness remains for the listener to assess.
 
 Verified on 2026-09-06 with an NVIDIA RTX 4090 (24 GB VRAM), i9-13900K, and approximately 64 GB RAM:

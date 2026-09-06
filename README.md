@@ -28,7 +28,7 @@ The web service binds to `127.0.0.1:4173`; Qwen's Python audio service binds to 
 
 Reading & audio settings defaults to **Local AI narrator**, with three AI-designed female voices: **Claire** (gentle American, default), **Grace** (warm American), and **Helen** (refined American). Use **Preview voice** to compare them. Close settings to use the main pause/resume and stop controls. Lesson text, questions, feedback, self-check criteria, and experiment results all use the selected audio source.
 
-Claire uses a soft, rounded, velvety tone with a subtle whimsical lilt at a steady conversational pace. Speaking speed remains controlled separately by your saved speed setting.
+Claire uses a soft, rounded, velvety tone with a subtle whimsical lilt at a steady conversational pace. Her delivery is directed toward connected speech: gently linked word endings and beginnings, lighter unstressed words, and emphasis across whole phrases. Speaking speed remains controlled separately by your saved speed setting.
 
 Qwen3-TTS-12Hz-1.7B-VoiceDesign creates short reference recordings during setup. The companion 1.7B-Base model reuses those references for a consistent narrator. Only the Base model remains loaded during ordinary use. Both run through the official `qwen-tts` package with CUDA PyTorch and Windows-compatible SDPA attention. Model revisions are pinned in `audio_service.py`.
 
