@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI, understood · Your learning studio</title><link rel="stylesheet" href="style.css"></head>
+<body><a class="skip" href="#lesson">Skip to lesson</a>
+<header class="app-header"><h1>AI, understood.</h1>
+<div class="player" role="group" aria-label="Narration controls">
+<button id="play" class="icon-button" aria-label="Play lesson" title="Play lesson"><span aria-hidden="true">▶</span></button>
+<button id="stop" class="icon-button" aria-label="Stop" title="Stop" hidden><span aria-hidden="true">■</span></button>
+<button id="pause" class="icon-button" aria-label="Pause" title="Pause" disabled><span aria-hidden="true">⏸</span></button>
+<button id="restart" class="icon-button" aria-label="Restart lesson" title="Restart lesson"><span aria-hidden="true">⟳</span></button>
+<button id="replay" class="icon-button" aria-label="Replay passage" title="Replay passage"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4H4v5M4 4l6 6M12 5h8v15H8v-7M12 13h5M12 17h5"/></svg></button>
+</div>
+<button id="open-settings" class="icon-button" aria-label="Reading and audio settings" title="Reading and audio settings" aria-haspopup="dialog"><span aria-hidden="true">⚙</span></button>
+</header>
+<dialog id="settings-dialog" aria-labelledby="settings-title"><div class="dialog-heading"><h2 id="settings-title">Reading & audio settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings" title="Close settings"><span aria-hidden="true">×</span></button></div><div class="settings">
+<label>Text size <select id="size"><option value="24">Large · 24 px</option><option value="30">Larger · 30 px</option><option value="36">Extra large · 36 px</option></select></label>
+<label>Appearance <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+<label>Speaking speed <select id="rate"><option value="0.75">0.75 ×</option><option value="1">1 ×</option><option value="1.25">1.25 ×</option><option value="1.5">1.5 ×</option></select></label>
+<label>Narrator <select id="voice" aria-describedby="voice-note"></select></label>
+<label><input type="checkbox" id="follow"> Follow the spoken passage automatically</label>
+</div><p id="voice-note">Narration uses voices supplied by your browser or operating system. Some voices may use an online service. No microphone or camera is enabled.</p></dialog>
+<main class="course-layout">
+<aside class="course-sidebar" aria-label="Lesson navigation">
+<section class="panel"><button id="toggle-sidebar" aria-expanded="true" aria-controls="sidebar-details">Minimize panel</button>
+<p id="current-lesson" class="current-lesson"></p>
+<p id="audio-status" role="status">Ready to read. Highlighting follows the spoken passage.</p></section>
+<div id="sidebar-details">
+<section class="panel"><h2>Lessons</h2><nav aria-label="Lessons" id="lessons" class="lesson-nav"></nav></section>
+</div>
+</aside>
+<div class="course-content">
+<article id="lesson" tabindex="-1" class="panel">
+<p id="lesson-meta" class="eyebrow"></p><h2 id="title"></h2><p id="objective"></p>
+<div id="passages"></div>
+<section id="experiment" hidden><h3>Try it: one learning step</h3><p>Our toy predictor multiplies an input by one adjustable weight. The example input is 2 and the target is 6. Predict what will happen before changing the weight.</p><label>Weight <input id="weight" type="range" min="0" max="5" step="0.5" value="1"></label><output id="result" aria-live="polite"></output><button id="read-result">Read experiment result</button><button id="train">Move the weight one training step</button><button id="reset-experiment">Reset experiment</button><p>Training step: add 0.1 times the input times the prediction error to the weight. This reduces half the squared error for this example. This is a one-parameter teaching model, not an LLM.</p></section>
+<section class="practice"><h3>Check your understanding</h3><button id="read-question">Read question & choices</button><p id="question"></p><fieldset id="choices"><legend>Choose an answer</legend></fieldset><button id="check">Check answer</button><button id="read-feedback">Read feedback</button><p id="feedback" role="status"></p><details><summary>Explain the answer</summary><p id="explanation"></p></details></section>
+<section><h3>Explain it in your own words</h3><p id="prompt"></p><label for="notes">Your explanation or questions</label><textarea id="notes" rows="5" placeholder="Type here, or use your preferred operating-system dictation tool."></textarea><p>This first unit saves your notes on this browser. It does not yet provide conversational AI or assess spoken answers.</p><details><summary>Compare with the self-check criteria</summary><p id="rubric"></p></details></section>
+<button id="read-prompt">Read explanation prompt</button><button id="read-criteria">Read self-check criteria</button>
+<div class="actions"><button id="complete">Mark lesson reviewed</button><button id="next">Next lesson</button></div>
+</article>
+<section class="intro panel"><p class="eyebrow">UNIT 01 · THE BIG PICTURE</p><h2>From data to an AI system</h2><p>Understand what changes during training, what happens during inference, and where language models and video super-resolution fit.</p><p>Plan for 3–5 hours this week, including practice and review. Take breaks whenever you need them.</p><p id="progress"></p></section>
+<section class="panel"><h2>Your weekly rhythm</h2><p>Session 1: lessons 1–2 and the experiment. Session 2: lessons 3–4 and a Python refresher. Session 3: lessons 5–6 and the case study. Start the next week by explaining training, inference, and VSR without looking at your notes. Use spare time to repeat difficult examples.</p><p id="review"></p><button id="export">Download notes & progress</button></section>
+<details class="panel"><summary>The course ahead</summary><p>Only Unit 1 is implemented. Future units will cover Python and mathematics refreshers; neural networks; data sourcing; transformers and LLM families; training and adaptation; inference and hardware; retrieval and agents; speech; image and video generation; VSR; evaluation and production systems.</p><p>Your emphasis is understanding and comparison. We will choose the depth of VSR after its introductory lesson. Your planned pace is 3–5 hours weekly, with an optional services budget of up to $100 monthly. This version makes no paid service calls.</p></details>
+<details class="panel"><summary>References & teaching approach</summary><p>The lessons are self-contained. These references are optional.</p><ul><li><a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need — transformer architecture</a></li><li><a href="https://arxiv.org/abs/2012.02181">BasicVSR — video super-resolution components</a></li><li><a href="https://ies.ed.gov/ncee/wwc/practiceguide/1">IES — worked examples, retrieval, and spaced learning</a></li><li><a href="https://www.w3.org/WAI/media/av/">W3C — accessible audio and transcripts</a></li></ul></details>
+</div></main><footer>Built for your pace · Audio, text, and hands-on understanding</footer><script type="module" src="app.js"></script></body></html>
