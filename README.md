@@ -16,7 +16,7 @@ Open http://127.0.0.1:4173 in a browser. No dependency installation, API keys, G
 
 ## Windows start and stop shortcuts
 
-With Node.js installed, double-click `start.bat` in this directory to run the web service in the background, then open http://127.0.0.1:4173. Double-click `stop.bat` to stop it. These launchers work from any working directory, including paths containing spaces. Starting twice leaves the existing server running; stopping twice is harmless.
+With Node.js installed, double-click `start.bat` in this directory to run the web service in the background and open http://127.0.0.1:4173 in your default browser. The browser opens only after the start command succeeds, including when the server is already running. Double-click `stop.bat` to stop it. These launchers work from any working directory, including paths containing spaces. Starting twice leaves the existing server running and opens the course again; stopping twice is harmless.
 
 You can also run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\service.ps1 start` (or `stop`) from this directory. The batch files apply that execution-policy setting only to their PowerShell process; they do not change your system policy. Logs are written to `.service/`, which Git ignores. The stop launcher targets only servers started by these launchers for this directory. If you used `npm start`, stop that server with Ctrl+C in its terminal first.
 

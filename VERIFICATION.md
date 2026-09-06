@@ -12,6 +12,7 @@ Checked on 2026-09-06 after adding start.bat, stop.bat, and service.ps1:
 - Started and stopped a copy in a path containing spaces while using a different working directory.
 - All three existing Node tests passed. Test servers were stopped after verification.
 - Batch launchers were executed from a terminal; Explorer double-click interaction was not separately tested.
+- Default-browser follow-up: ran the updated start.bat successfully with the Windows URL-open command after the startup error guard; the server returned HTTP 200 and all three Node tests passed. Browser rendering was not separately inspected. The server was left running for use.
 
 ## Course application
 
