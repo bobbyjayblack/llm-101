@@ -4,6 +4,8 @@ Checked on 2026-09-06.
 
 ## Local Qwen3-TTS integration
 
+Claire tone revision, 2026-09-06: changed her design to a softer, rounded, velvety adult voice with a subtle whimsical lilt and a steady conversational pace. Regenerated only Claire's reference and restarted both services. Her identical preview measured 10.40 seconds versus 10.24 seconds previously (about 1.6% difference); browser speed settings were unchanged. Real synthesis and cached replay passed; Grace and Helen retained their existing audio. Seven Node tests and three Python tests passed. Voice-version hashing prevents the previous Claire recordings from being reused for new requests. Subjective softness remains for the listener to assess.
+
 Verified on 2026-09-06 with an NVIDIA RTX 4090 (24 GB VRAM), i9-13900K, and approximately 64 GB RAM:
 
 - Installed isolated Python 3.12, CUDA PyTorch 2.10.0/cu128, and qwen-tts 0.1.1. Downloaded pinned VoiceDesign and Base 1.7B snapshots (approximately 9.1 GB total model files).
