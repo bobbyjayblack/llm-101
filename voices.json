@@ -1,0 +1,20 @@
+[
+  {
+    "id": "claire",
+    "name": "Claire · gentle American",
+    "description": "An adult woman with a cultivated American English accent, gently articulated consonants, a warm medium-low pitch, and a soft, relaxed delivery. Calm, understated, and reassuring. Read as a patient tutor speaking to one adult listener, with natural pauses and subtle expression. Clear full voice, without whispering, exaggerated breathiness, or an announcer's cadence.",
+    "seed": 42
+  },
+  {
+    "id": "grace",
+    "name": "Grace · warm American",
+    "description": "A mature adult woman speaking clear standard American English. Warm, mellow alto voice, soft spoken but fully audible, with a friendly conversational rhythm and gentle natural inflection. An attentive tutor explaining an interesting idea calmly to one person. Unhurried and articulate, without theatrical delivery or whispering.",
+    "seed": 73
+  },
+  {
+    "id": "helen",
+    "name": "Helen · refined American",
+    "description": "An adult woman with a refined, lightly New England American English accent. Smooth medium-pitched voice, precise diction, and quiet warmth. Soft spoken, composed and thoughtful, with natural sentence emphasis and relaxed pauses. Conversational educational narration, not a newsreader, not breathy or whispered.",
+    "seed": 107
+  }
+]

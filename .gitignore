@@ -1,1 +1,6 @@
 .service/
+.venv/
+.models/
+.audio/
+__pycache__/
+node_modules/

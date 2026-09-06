@@ -2,6 +2,21 @@
 
 Checked on 2026-09-06.
 
+## Local Qwen3-TTS integration
+
+Verified on 2026-09-06 with an NVIDIA RTX 4090 (24 GB VRAM), i9-13900K, and approximately 64 GB RAM:
+
+- Installed isolated Python 3.12, CUDA PyTorch 2.10.0/cu128, and qwen-tts 0.1.1. Downloaded pinned VoiceDesign and Base 1.7B snapshots (approximately 9.1 GB total model files).
+- Generated three original female narrator references: Claire, Grace, and Helen. A separate local Whisper base.en transcription recovered the intended reference content, with a minor "try an"/"try and" transcription difference. This checks intelligibility, not subjective voice comfort or speaker demographics.
+- The Base model loads on CUDA with Hugging Face and Transformers offline modes enabled. Both loopback services report the same project identity and become ready before the launcher returns.
+- Real speech requests through the course server produced nonempty 24 kHz PCM WAVs for all three voices. Initial preview timings: Claire 12.93 seconds for 10.24 seconds of audio; Grace 19.68 seconds for 8.80 seconds; Helen 20.38 seconds for 8.88 seconds. Identical cached replays took 7–31 ms and returned identical bytes. First-time generation is not guaranteed to keep up with playback; Prepare lesson audio is provided for uninterrupted reading.
+- Seven Node tests passed: course arithmetic/structure, segment text preservation, stale-request cancellation, pause during generation, speed changes, segment progression, static-file allowlist, and HTTP request boundaries. Three Python tests passed for input validation and voice/cache versioning.
+- Headless Chrome integration exercised real local preview and lesson playback, pause/resume/stop, highlighted passages, 1.25x speed, 36-pixel text, light theme, three narrator options, prepare/cancel controls, browser-source selection, and note persistence. No JavaScript page errors or horizontal page overflow occurred. The settings screenshot was inspected; the large-text dialog scrolls to its lower controls. Tests used a separate browser context and removed the temporary note.
+- Repeated start reuses the existing services. Repeated stop succeeds. Both port-conflict cases (4173 and 4174), concurrent-launch locking, and preservation of an unrelated test Node process passed.
+- Stop removed both the venv Python launcher and its model process. Observed total GPU memory fell from 8,033 MiB to 2,500 MiB, releasing approximately 5.5 GB. Other applications remained running.
+
+Remaining validation: the learner's preference among the synthetic voices, comfort over long listening sessions, and pronunciation of all course text. Browser checks establish playback behavior; they do not substitute for listening on the learner's actual speakers/headphones. Fresh speech may pause for generation. Cached lesson audio avoids that delay.
+
 ## Windows service launchers
 
 Checked on 2026-09-06 after adding start.bat, stop.bat, and service.ps1:

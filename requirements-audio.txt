@@ -1,0 +1,5 @@
+# CUDA PyTorch is installed separately by setup-audio.ps1.
+qwen-tts==0.1.1
+numpy==2.2.6
+soundfile==0.13.1
+huggingface-hub==0.36.2

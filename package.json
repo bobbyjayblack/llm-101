@@ -1,1 +1,1 @@
-{"name":"llm101","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test"}}
+{"name":"llm101","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test course.test.js narration.test.js server.test.js","test:browser":"node checks/browser.mjs"},"devDependencies":{"playwright":"1.63.0"}}
