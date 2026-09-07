@@ -7,8 +7,8 @@ const errors=[];page.on('pageerror',error=>errors.push(error.message));
 try{
   await page.goto('http://127.0.0.1:4173');
   await page.locator('#unit-2').click();
-  await page.locator('#unit-lessons-2 button').first().click();
-  for(const control of ['#play','#read-lab-task']){
+  await page.locator('#unit-lessons-2 a').first().click();
+  for(const control of ['#play','#read-lab-task','.equation button']){
     const started=Date.now();await page.locator(control).click();
     await page.waitForFunction(()=>CSS.highlights.get('spoken-word')?.size>0,{},{timeout:240000});
     const word=await page.evaluate(()=>[...CSS.highlights.get('spoken-word')][0].toString());

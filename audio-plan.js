@@ -7,7 +7,8 @@ export function lessonAudioTexts(item){
   return [...item.paragraphs,item.question+' '+item.options.map((s,i)=>`Choice ${i+1}. ${s}`).join(' '),item.prompt,item.rubric,
     'Correct. '+item.explanation,'Revisit this idea. '+item.explanation,
     item.recall||'In three days, explain this lesson without notes, then compare with the self-check criteria. Repeat after one week with a new example.',
-    lab.task,lab.expected+' '+lab.troubleshooting,...lab.scenarios.map((_,i)=>labNarration(runLab(item.unit,i)))];
+    lab.task,lab.expected+' '+lab.troubleshooting,...lab.scenarios.map((_,i)=>labNarration(runLab(item.unit,i))),
+    ...(item.equations||[]).map(equation=>equation.title+'. '+equation.spoken)];
 }
 
 // Use the same text and segmentation as the player so every request is a cache hit.

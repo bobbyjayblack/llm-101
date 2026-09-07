@@ -66,6 +66,12 @@ For pre-render progress or errors, see `.service/prerender-claire.json` and `.se
 
 ## Lessons and labs
 
+Mathematical examples include 28 equation cards across 22 lessons, placed beside their related explanations. Each card defines the notation in words and has a **Read equation** control using the selected narrator and word underlining. Examples include gradients, attention, perplexity, low-rank updates, cache memory, audio metrics, diffusion, and PSNR. Equation explanations are included in manual lesson preparation and the background audio plan. **Play lesson** continues to read the main teaching paragraphs; use the equation button for its detailed notation reading.
+
+Each lesson has a bookmarkable URL, for example `http://127.0.0.1:4173/?lesson=7`. Selecting a lesson or using Next/Previous updates the address and browser tab title; Back and Forward restore the corresponding lesson. Sidebar lesson links support copying their address and opening a new tab. A valid lesson URL takes precedence over the saved lesson; opening the base address resumes your saved lesson. Invalid lesson numbers fall back to saved progress. These local links work on a computer running the course at that address.
+
+The shared material below the lesson is grouped under **Course Overview So Far**, collapsed by default. Expand it for course progress, the weekly rhythm, **Download notes & progress**, course scope, and references.
+
 The header is labeled **LLM 101**. Its leftmost arrow icon toggles the compact sidebar; the icon's tooltip and accessible label switch between Collapse sidebar and Expand sidebar.
 
 All 13 **Course units** appear in the sidebar. Click a unit to expand its lessons directly underneath; the other unit headings remain in order below. Opening another unit collapses the previous list, and clicking an expanded unit collapses it. Select a lesson to open it. Expanding a unit scrolls the current lesson to the top without changing your reading position or notes. The numbered lesson title and reading status appear directly beneath the unit/lesson line. **Next lesson** and **Previous lesson** cross unit boundaries and expand the matching unit automatically. Unit buttons support Enter and Space; Tab reaches the expanded lessons. Original notes, answers, review dates, and passage bookmarks remain attached to the original six lessons.

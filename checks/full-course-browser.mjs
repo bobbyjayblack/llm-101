@@ -10,14 +10,14 @@ const errors=[];page.on('pageerror',error=>errors.push(error.message));
 async function selectUnit(unit){
   const button=page.locator(`#unit-${unit}`);
   if(await button.getAttribute('aria-expanded')!=='true')await button.click();
-  await page.locator(`#unit-lessons-${unit} button`).first().click();
+  await page.locator(`#unit-lessons-${unit} a`).first().click();
 }
 try{
   await page.goto('http://127.0.0.1:4173');
   await page.locator('#unit-13').waitFor({state:'attached'});
   // This browser context is isolated from the learner's profile.
   await page.evaluate(()=>localStorage.setItem('ai-understood-v1',JSON.stringify({lesson:1,passage:2,notes:{1:'Existing learner note'},reviewed:{0:1},answers:{1:0},rate:'1.3',narrationSpeedVersion:2})));
-  await page.reload();
+  await page.goto('http://127.0.0.1:4173/');
   assert.equal(await page.locator('#title').textContent(),lessons[1].title);
   assert.equal(await page.locator('#notes').inputValue(),'Existing learner note');
   assert.match(await page.locator('#audio-status').textContent(),/passage 3/);
@@ -29,15 +29,20 @@ try{
   assert.equal(await page.locator('#title').textContent(),lessons[1].title,'expansion does not replace the current lesson');
   assert.equal(await page.locator('.unit-toggle[aria-expanded=true]').count(),1);
   assert.equal(await page.locator('#unit-lessons-1').isVisible(),false);
-  assert.equal(await page.locator('#unit-lessons-3 button:visible').count(),2);
+  assert.equal(await page.locator('#unit-lessons-3 a:visible').count(),2);
   assert.equal(await page.locator('#unit-lessons-3').evaluate(el=>el.parentElement.nextElementSibling.querySelector('button').id),'unit-4');
   await page.locator('#unit-3').click();assert.equal(await page.locator('#unit-lessons-3').isVisible(),false);
   for(let i=0;i<lessons.length;i++){
     const lesson=lessons[i];
     if(await page.locator(`#unit-${lesson.unit}`).getAttribute('aria-expanded')!=='true')await page.locator(`#unit-${lesson.unit}`).click();
-    await page.getByRole('button',{name:new RegExp(`^Lesson ${i+1}:`)}).click();
+    await page.getByRole('link',{name:new RegExp(`^Lesson ${i+1}:`)}).click();
     assert.equal(await page.locator('#title').textContent(),lesson.title);
     assert.equal(await page.locator('.passage p').count(),lesson.paragraphs.length);
+    assert.equal(await page.locator('.equation').count(),(lesson.equations||[]).length);
+    for(const [j,equation] of (lesson.equations||[]).entries()){
+      assert.equal(await page.locator('.equation-expression').nth(j).textContent(),equation.expression);
+      assert.ok(await page.getByRole('button',{name:`Read equation: ${equation.title}`,exact:true}).isVisible());
+    }
     await page.locator(`input[name=answer][value="${lesson.correct}"]`).check();
     await page.locator('#check').click();assert.equal(await page.locator('#feedback').textContent(),'Correct. '+lesson.explanation);
     assert.ok((await page.locator('#lesson-recall').textContent()).length>30);
@@ -66,10 +71,10 @@ try{
   assert.equal(await page.locator('#unit-1').getAttribute('aria-expanded'),'true');
   await page.keyboard.press('Space');assert.equal(await page.locator('#unit-1').getAttribute('aria-expanded'),'false');
   await page.keyboard.press('Enter');await page.keyboard.press('Tab');
-  assert.equal(await page.locator('#unit-lessons-1 button').first().evaluate(el=>el===document.activeElement),true);
+  assert.equal(await page.locator('#unit-lessons-1 a').first().evaluate(el=>el===document.activeElement),true);
   await page.keyboard.press('Enter');
   assert.ok(await page.locator('#previous').isDisabled());
-  await page.getByRole('button',{name:/^Lesson 2:/}).click();assert.equal(await page.locator('#notes').inputValue(),'Existing learner note');
+  await page.getByRole('link',{name:/^Lesson 2:/}).click();assert.equal(await page.locator('#notes').inputValue(),'Existing learner note');
   await page.locator('#open-settings').click();await page.locator('#size').selectOption('24');await page.locator('#theme').selectOption('dark');await page.locator('#close-settings').click();
   await selectUnit(5);await page.locator('#run-lab').click();await page.locator('#unit-lab').scrollIntoViewIfNeeded();
   await page.screenshot({path:'.service/full-course-dark.png'});
@@ -82,6 +87,25 @@ try{
   await page.locator('#toggle-sidebar').click();
   await page.setViewportSize({width:480,height:900});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.goto('http://127.0.0.1:4173/?lesson=7');
+  await page.locator('#open-settings').click();await page.locator('#size').selectOption('36');await page.locator('#theme').selectOption('light');await page.locator('#close-settings').click();
+  await page.locator('.equation').scrollIntoViewIfNeeded();
+  await page.screenshot({path:'.service/equation-light-mobile.png'});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  assert.equal(await page.locator('#title').textContent(),lessons[6].title,'bookmark overrides the previously saved lesson');
+  assert.match(await page.title(),/^Lesson 7:/);
+  assert.match(await page.locator('#unit-lessons-2 a').first().getAttribute('href'),/\?lesson=7$/);
+  await page.locator('#next').click();assert.equal(new URL(page.url()).searchParams.get('lesson'),'8');
+  await page.goBack();assert.equal(await page.locator('#title').textContent(),lessons[6].title);
+  await page.goForward();assert.equal(await page.locator('#title').textContent(),lessons[7].title);
+  await page.reload();assert.equal(await page.locator('#title').textContent(),lessons[7].title);
+  await page.goto('http://127.0.0.1:4173/?lesson=999');
+  assert.equal(await page.locator('#title').textContent(),lessons[7].title,'invalid bookmark falls back to saved lesson');
+  assert.equal(new URL(page.url()).searchParams.get('lesson'),'8');
+  const fresh=await browser.newPage();
+  await fresh.goto('http://127.0.0.1:4173/?lesson=30');
+  assert.equal(await fresh.locator('#title').textContent(),lessons[29].title,'deep link works without existing progress');
+  await fresh.close();
   assert.deepEqual(errors,[]);
   console.log('30 lessons, 26 lab scenarios, quiz feedback, unit boundaries, keyboard selection, old/new notes, review persistence, 36px light/24px dark, and mobile overflow passed.');
 }finally{await browser.close();}

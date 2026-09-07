@@ -2,6 +2,22 @@
 
 Checked on 2026-09-06.
 
+## Equations beside scientific examples
+
+Added 28 equation cards across 22 lessons, with defined symbols, units, assumptions, worked substitutions, and separate Read equation controls. Cards sit after their related paragraphs without changing passage indexing or existing recordings. Spoken notation explanations participate in word underlining, manual audio preparation, and the expanded background plan of 815 clips. Services restarted to load that plan and resume missing recordings.
+
+All 20 Node tests passed, including equation placement and complete audio-plan coverage. Both browser suites passed; full-course checks verified every equation's displayed expression and read control. A real unit-2 equation reading reached audio with a visible word underline after 13.811 seconds while new audio was being prepared; pause/resume/stop passed. This is a combined browser-action/alignment observation, not an isolated synthesis benchmark. Inspected 36 px light equation text on a 480 px viewport; adjusted narrow-screen header controls into two rows to prevent title crowding. Course-wide new equation audio preparation remains resumable background work.
+
+## Bookmarkable lesson URLs
+
+Lesson links and Next/Previous update `?lesson=N` and the browser tab title. Sidebar lessons are native links with copy-address and new-tab support. Valid URLs override the saved lesson; the base address and invalid lesson numbers fall back to saved progress. Browser history navigation stops stale playback through the existing render path.
+
+All 19 Node tests and both browser suites passed. Additional full-course checks verified a direct lesson-7 bookmark overriding prior progress, Next updating to lesson 8, Back/Forward, reload, invalid-number fallback, and opening lesson 30 in a fresh browser context. Existing keyboard navigation, notes, compact layout, and mobile overflow checks continue to pass.
+
+## Collapsible course overview
+
+Grouped the shared end-of-lesson overview, weekly rhythm, notes export, scope, and references under a native **Course Overview So Far** disclosure, closed by default. All 19 Node tests and both browser suites passed. A separate browser check confirmed the default closed state, export visibility after expansion, and keyboard collapse with Enter.
+
 ## SEO documentation release
 
 Added an explicitly labeled SEO-oriented overview and learner FAQ at the very bottom of README.md, with accurate course capabilities, links to project resources, license scope, and search-visibility limitations. The wiki home links to this overview and distinguishes the public documentation from the local application. No application, lesson, narration, or hosting behavior changed.

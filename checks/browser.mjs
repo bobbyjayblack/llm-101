@@ -37,7 +37,7 @@ try{
   await page.getByRole('button',{name:'Cancel audio preparation',exact:true}).click();
   await page.getByRole('button',{name:'Close settings',exact:true}).click();
   await page.getByText('Audio preparation stopped. Completed segments remain saved.',{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Lesson 2: Training versus inference',exact:true}).click();
+  await page.getByRole('link',{name:'Lesson 2: Training versus inference',exact:true}).click();
   await page.locator('#notes').fill('Temporary browser verification note');
   await page.reload();
   assert.equal(await page.locator('#notes').inputValue(),'Temporary browser verification note');

@@ -9,6 +9,14 @@ try{const saved=JSON.parse(localStorage.getItem(key));if(saved&&typeof saved==='
 // Apply the requested faster pace once; later manual speed choices still persist.
 if(state.narrationSpeedVersion!==2){state.rate='1.3';state.narrationSpeedVersion=2;}
 if(!Number.isInteger(state.lesson)||!lessons[state.lesson])state.lesson=0;
+function linkedLesson(){
+  const value=new URL(location.href).searchParams.get('lesson');
+  return value&&/^[1-9]\d*$/.test(value)&&lessons[Number(value)-1]?Number(value)-1:null;
+}
+function lessonURL(index){const url=new URL(location.href);url.searchParams.set('lesson',index+1);url.hash='';return url.pathname+url.search;}
+const initialLesson=linkedLesson();
+if(initialLesson!==null&&initialLesson!==state.lesson){state.lesson=initialLesson;state.passage=0;}
+history.replaceState(null,'',lessonURL(state.lesson));
 for(const k of ['notes','reviewed','answers'])if(!state[k]||typeof state[k]!=='object')state[k]={};
 let current=Math.max(0,Math.min(Number(state.passage)||0,lessons[state.lesson].paragraphs.length-1));
 let speaking=false,paused=false,generation=0,utterance=null,voices=[];
@@ -97,23 +105,34 @@ function renderNavigation(){
       if(open)$('lesson').scrollIntoView({block:'start',behavior:'instant'});
     };
     list.replaceChildren(...lessons.map((item,i)=>({item,i})).filter(({item})=>item.unit===unit.id).map(({item,i})=>{
-    const b=document.createElement('button');
+    const b=document.createElement('a');b.href=lessonURL(i);
     const label=`Lesson ${i+1}: ${item.title}${state.reviewed[i]?' · reviewed':''}`;
     b.setAttribute('aria-label',label);b.title=label;
     const number=document.createElement('span');number.className='lesson-number';number.textContent=i+1;number.setAttribute('aria-hidden','true');
     const title=document.createElement('span');title.className='lesson-label';title.textContent=`${item.title}${state.reviewed[i]?' · reviewed':''}`;title.setAttribute('aria-hidden','true');
     b.append(number,title);if(i===state.lesson)b.setAttribute('aria-current','step');
-    b.onclick=()=>{state.lesson=i;current=0;render(true);};return b;
+    b.onclick=event=>{if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigateLesson(i);};return b;
     }));
     group.append(toggle,list);return group;
   }));
 }
 function render(focus=false){
   halt();const l=lessons[state.lesson];
+  document.title=`Lesson ${state.lesson+1}: ${l.title} · LLM 101`;
   renderNavigation();
   $('lesson-meta').textContent=`UNIT ${l.unit} OF ${units.length} · ${units[l.unit-1].title} · LESSON ${state.lesson+1} OF ${lessons.length}`;$('title').textContent=l.title;$('objective').textContent=l.goal;
   $('lesson-number-label').textContent=`${state.lesson+1}. `;
-  $('passages').replaceChildren(...l.paragraphs.map((text,i)=>{const div=document.createElement('div');div.className='passage';const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.textContent=`Read from passage ${i+1}`;b.onclick=()=>read(i);div.append(p,b);return div;}));
+  $('passages').replaceChildren(...l.paragraphs.map((text,i)=>{const div=document.createElement('div');div.className='passage';const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.textContent=`Read from passage ${i+1}`;b.onclick=()=>read(i);div.append(p);
+    for(const equation of l.equations||[]){if(equation.after!==i)continue;
+      const figure=document.createElement('figure');figure.className='equation';
+      const caption=document.createElement('figcaption');caption.textContent=equation.title;
+      const formula=document.createElement('pre');formula.className='equation-expression';formula.textContent=equation.expression;
+      const explanation=document.createElement('div');explanation.className='equation-explanation';explanation.textContent=equation.spoken;
+      const listen=document.createElement('button');listen.textContent='Read equation';listen.setAttribute('aria-label',`Read equation: ${equation.title}`);
+      listen.onclick=()=>readExtra(equation.title+'. '+equation.spoken,[caption,explanation]);
+      figure.append(caption,formula,explanation,listen);div.append(figure);
+    }
+    div.append(b);return div;}));
   if(l.code){const pre=document.createElement('pre');pre.textContent=l.code;$('passages').append(pre);}
   $('experiment').hidden=!l.experiment;$('question').textContent=l.question;
   $('choices').innerHTML='<legend>Choose an answer</legend>';
@@ -178,8 +197,16 @@ $('close-settings').onclick=()=>$('settings-dialog').close();
 $('notes').oninput=()=>{state.notes[state.lesson]=$('notes').value;save();};
 $('check').onclick=()=>{const answer=state.answers[state.lesson];$('feedback').textContent=answer===undefined?'Choose an answer first.':answer===lessons[state.lesson].correct?'Correct. '+lessons[state.lesson].explanation:'Revisit this idea. '+lessons[state.lesson].explanation;};
 $('complete').onclick=()=>{state.reviewed[state.lesson]=Date.now();render();};
-$('next').onclick=()=>{if(state.lesson<lessons.length-1){state.lesson++;current=0;render(true);}};
-$('previous').onclick=()=>{if(state.lesson>0){state.lesson--;current=0;render(true);}};
+function navigateLesson(index){
+  if(index!==state.lesson)history.pushState(null,'',lessonURL(index));
+  state.lesson=index;current=0;render(true);
+}
+$('next').onclick=()=>{if(state.lesson<lessons.length-1)navigateLesson(state.lesson+1);};
+$('previous').onclick=()=>{if(state.lesson>0)navigateLesson(state.lesson-1);};
+window.addEventListener('popstate',()=>{
+  const index=linkedLesson();if(index===null)return;
+  if(index!==state.lesson){state.lesson=index;current=0;render(true);}
+});
 function sidebar(){
   const compact=Boolean(state.sidebarCompact);
   document.querySelector('.course-layout').classList.toggle('sidebar-compact',compact);
