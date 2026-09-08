@@ -75,6 +75,10 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
 #audio-preparation h3{margin:0}
 #current-lesson{margin-bottom:.3rem}
 #audio-status{margin-top:0}
+.lesson-guide{margin:1rem 0;padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;background:color-mix(in srgb,var(--panel) 75%,var(--bg))}
+.lesson-guide h3{margin-top:0}.lesson-guide dl{margin:0}.lesson-guide dl>div{display:grid;grid-template-columns:minmax(8rem,25%) minmax(0,1fr);gap:.8rem;padding:.35rem 0;border-top:1px solid color-mix(in srgb,var(--border) 65%,transparent)}.lesson-guide dl>div:first-child{border-top:0}.lesson-guide dt{font-weight:700;color:var(--muted)}.lesson-guide dd{margin:0;overflow-wrap:anywhere}.lesson-guide a{overflow-wrap:anywhere}
+#lab-input-details,#lab-trace-details{margin:.8rem 0}.lab-evidence-note{padding:.6rem .8rem;border-left:4px solid var(--accent);background:var(--mark);font-size:.9rem}
+#lab-input,#lab-trace{font-size:.8rem}
 
 .header-brand{display:flex;align-items:center;gap:.4rem;min-width:0}
 .header-brand h1{flex-shrink:1}
@@ -94,3 +98,4 @@ header,main,footer{max-width:none;width:100%;margin:0;padding:.5rem}
   .app-header .player{grid-column:1 / -1;grid-row:2}
   .course-content #lesson{scroll-margin-top:6rem}
 }
+@media(max-width:520px){.lesson-guide dl>div{grid-template-columns:1fr;gap:.1rem}.lesson-guide dt{font-size:.85rem}}

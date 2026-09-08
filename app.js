@@ -116,11 +116,108 @@ function renderNavigation(){
     group.append(toggle,list);return group;
   }));
 }
+function values(value){
+  if(value===undefined||value===null||value==='')return [];
+  return Array.isArray(value)?value:[value];
+}
+function lessonGuideData(lesson){
+  const meta=lesson.metadata||{};
+  return {
+    prerequisites:meta.prerequisiteLessons,
+    time:meta.estimatedMinutes,
+    reading:meta.reading,
+    assessment:meta.successCheck,
+    evidence:meta.evidenceTier,
+  };
+}
+function textValue(value){
+  if(value&&typeof value==='object'&&!Array.isArray(value))return value.text??value.description??value.label??value.title??JSON.stringify(value);
+  return String(value);
+}
+function prerequisiteText(value){
+  return values(value).map(item=>{
+    if(Number.isInteger(item)&&lessons[item])return `Lesson ${item+1}: ${lessons[item].title}`;
+    if(typeof item==='number'&&lessons[item-1])return `Lesson ${item}: ${lessons[item-1].title}`;
+    return textValue(item);
+  }).join('; ');
+}
+function renderReading(target,value){
+  target.replaceChildren();
+  values(value).forEach((item,index)=>{
+    if(index)target.append(document.createTextNode('; '));
+    if(item&&typeof item==='object'&&item.url){
+      let url;try{url=new URL(item.url,location.href);}catch{url=null;}
+      const label=item.label||item.title||item.url;
+      if(url&&['http:','https:'].includes(url.protocol)){
+        const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener';link.textContent=label;link.setAttribute('aria-label',`Open reading: ${label}`);target.append(link);
+      }else target.append(document.createTextNode(label));
+    }else target.append(document.createTextNode(textValue(item)));
+  });
+}
+function renderLessonGuide(lesson){
+  const data=lessonGuideData(lesson),rows={
+    prerequisites:[$('lesson-prerequisites-row'),$('lesson-prerequisites')],
+    time:[$('lesson-time-row'),$('lesson-time')],
+    reading:[$('lesson-reading-row'),$('lesson-reading')],
+    assessment:[$('lesson-assessment-row'),$('lesson-assessment')],
+    evidence:[$('lesson-evidence-row'),$('lesson-evidence')],
+  };
+  const rendered={
+    prerequisites:prerequisiteText(data.prerequisites),
+    time:values(data.time).map(textValue).join('; '),
+    assessment:values(data.assessment).map(textValue).join('; '),
+    evidence:values(data.evidence).map(textValue).join('; '),
+  };
+  if(rendered.time&&/^\d+(?:\.\d+)?$/.test(rendered.time))rendered.time=`${rendered.time} minutes`;
+  rows.prerequisites[1].textContent=rendered.prerequisites;
+  rows.time[1].textContent=rendered.time;
+  renderReading(rows.reading[1],data.reading);
+  rows.assessment[1].textContent=rendered.assessment;
+  rows.evidence[1].textContent=rendered.evidence;
+  for(const [name,[row]] of Object.entries(rows))row.hidden=!((name==='reading'?data.reading:rendered[name])&&values(name==='reading'?data.reading:rendered[name]).length);
+  $('lesson-guide').hidden=!Object.values(rows).some(([row])=>!row.hidden);
+}
+function renderLabInput(lesson,lab){
+  const question=lab.query?$('lab-query').value:'(not applicable for this lab)';
+  $('lab-input').textContent=JSON.stringify({unit:lesson.unit,lesson:lesson.title,scenario:Number($('lab-scenario').value),question},null,2);
+}
+function clearLabOutput(){
+  halt();
+  $('lab-result').textContent='Choose a scenario, predict the result, then select Run lab.';
+  $('read-lab-result').disabled=true;$('lab-evidence-note').hidden=true;$('lab-evidence-note').textContent='';$('lab-trace-details').hidden=true;$('lab-trace-summary').textContent='';$('lab-trace').textContent='';status('Lab input changed. Predict and run the updated scenario.');
+}
+function renderLabTrace(result){
+  const trace=Array.isArray(result.trace)?result.trace.map((step,index)=>`${index+1}. ${step}`).join('\n'):'';
+  const fields=JSON.stringify(result,null,2);
+  const summary=[];
+  if(trace)summary.push(`Execution trace: ${result.trace.join(' → ')}.`);
+  if(result.source)summary.push(`Selected source: ${result.source}.`);
+  if(Array.isArray(result.cases))summary.push(`Acceptance cases: ${result.passed??result.cases.filter(item=>item.passed).length} of ${result.total??result.cases.length} passed.`);
+  if(result.externalActions!==undefined)summary.push(`External actions: ${result.externalActions}.`);
+  if(result.estimateOnly)summary.push('Measurement mode: deterministic estimate from fixed assumptions.');
+  if(result.illustrativeStagesMs)summary.push('Timing mode: illustrative stage values supplied by the fixture.');
+  if(result.retrieval||result.rerankedTopK)summary.push('Retrieval comparison: lexical and vector rankings, reranking, and evidence coverage are available in the structured output.');
+  if(result.abstain!==undefined)summary.push(`Abstention: ${result.abstain?'yes':'no'} under the authored support threshold.`);
+  if(result.staleCacheHit!==undefined)summary.push(`Cache check: ${result.staleCacheHit?'stale answer reused':'current version required'}.`);
+  if(result.trainedVSR===false)summary.push('Model status: toy arithmetic only; no trained restoration model was run.');
+  if(!summary.length)summary.push('This fixture returns labeled calculation fields; the structured output below preserves every input and result.');
+  $('lab-trace-summary').textContent=summary.join(' ');
+  $('lab-trace').textContent=trace?`${trace}\n\nStructured output\n${fields}`:`No explicit execution trace was returned by this fixture.\n\nStructured output\n${fields}`;
+  $('lab-trace-details').hidden=false;
+}
+function labEvidenceNote(result){
+  if(result?.estimateOnly)return 'Evidence note: these values are deterministic estimates from fixed assumptions, not a production latency or memory measurement.';
+  if(result?.illustrativeStagesMs)return 'Evidence note: stage durations are illustrative inputs for the worksheet; they are not measurements from a microphone or deployed service.';
+  if(result?.trainedVSR===false)return 'Evidence note: this is a one-dimensional toy calculation, not a measurement of a trained restoration model.';
+  if(result?.trace||result?.externalActions!==undefined)return 'Evidence note: this trace comes from the bounded authored local fixture. It does not establish broad model quality or security.';
+  return '';
+}
 function render(focus=false){
   halt();const l=lessons[state.lesson];
   document.title=`Lesson ${state.lesson+1}: ${l.title} · LLM 101`;
   renderNavigation();
   $('lesson-meta').textContent=`UNIT ${l.unit} OF ${units.length} · ${units[l.unit-1].title} · LESSON ${state.lesson+1} OF ${lessons.length}`;$('title').textContent=l.title;$('objective').textContent=l.goal;
+  renderLessonGuide(l);
   $('lesson-number-label').textContent=`${state.lesson+1}. `;
   $('passages').replaceChildren(...l.paragraphs.map((text,i)=>{const div=document.createElement('div');div.className='passage';const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.textContent=`Read from passage ${i+1}`;b.onclick=()=>read(i);div.append(p);
     for(const equation of l.equations||[]){if(equation.after!==i)continue;
@@ -143,8 +240,11 @@ function render(focus=false){
   $('lab-scenario').replaceChildren(...lab.scenarios.map((label,i)=>{const option=document.createElement('option');option.value=i;option.textContent=label;return option;}));
   $('lab-query-label').hidden=!lab.query;$('lab-query').value='Where do notes save?';
   $('lab-result').textContent='Choose a scenario, predict the result, then select Run lab.';$('read-lab-result').disabled=true;
+  $('lab-evidence-note').hidden=true;$('lab-evidence-note').textContent='';$('lab-trace-details').hidden=true;$('lab-trace').textContent='';renderLabInput(l,lab);
+  $('lab-scenario').onchange=()=>{renderLabInput(l,lab);clearLabOutput();};$('lab-query').oninput=()=>{renderLabInput(l,lab);clearLabOutput();};
   $('lab-expected').textContent=lab.expected;$('lab-troubleshooting').textContent=lab.troubleshooting;$('lab-solution').open=false;
   $('lab-command').textContent=`node labs.mjs ${l.unit} 0`;
+  const authoredRecall=Boolean(l.recall);$('recall-kind').textContent=authoredRecall?'AUTHORED RECALL PROMPT':'GENERAL RECALL SUGGESTION';
   $('lesson-recall').textContent=l.recall||'In three days, explain this lesson without notes, then compare with the self-check criteria. Repeat after one week with a new example.';
   $('unit-reference').href=units[l.unit-1].reference;
   $('previous').disabled=state.lesson===0;
@@ -181,7 +281,7 @@ $('read-prompt').onclick=()=>readExtra(lessons[state.lesson].prompt,[$('prompt')
 $('read-criteria').onclick=()=>{$('rubric').closest('details').open=true;readExtra(lessons[state.lesson].rubric,[$('rubric')]);};
 $('read-result').onclick=()=>readExtra($('result').textContent,[$('result')]);
 $('run-lab').onclick=()=>{
-  halt();try{const result=runLab(lessons[state.lesson].unit,Number($('lab-scenario').value),$('lab-query').value);$('lab-result').textContent=labNarration(result);$('read-lab-result').disabled=false;status('Lab finished. Compare your prediction with the result and explanation.');}
+  halt();try{const result=runLab(lessons[state.lesson].unit,Number($('lab-scenario').value),$('lab-query').value);$('lab-result').textContent=labNarration(result);$('read-lab-result').disabled=false;renderLabTrace(result);const note=labEvidenceNote(result);$('lab-evidence-note').textContent=note;$('lab-evidence-note').hidden=!note;status('Lab finished. Compare your prediction with the result and explanation.');}
   catch(error){$('lab-result').textContent=error.message;$('read-lab-result').disabled=true;}
 };
 $('read-lab-task').onclick=()=>readExtra($('lab-task').textContent,[$('lab-task')]);

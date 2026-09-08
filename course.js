@@ -129,7 +129,7 @@ lessons.push(
 ],question:'Why add smoothing to the tiny bigram model?',options:['To guarantee factual answers','To avoid zero probabilities for unseen vocabulary transitions','To give the model unlimited context'],correct:1,explanation:'Smoothing redistributes probability mass and prevents infinite loss for unseen transitions within the vocabulary. It does not extend the bigram context or establish factual correctness.',prompt:'Calculate the probability of sleeps after fox and explain one limitation of the reported perplexity.',rubric:'There are 2 sleeps counts, 3 total fox transitions, and 7 vocabulary items. Add-one smoothing gives 3 divided by 10. Perplexity depends on the exact tokenization and evaluation set; the model uses only one preceding token.',recall:'In three days, explain why a zero transition count is not proof that a sentence is impossible.'},
 {unit:5,title:'Attention and transformer architecture',goal:'Trace attention, causal masking, and the roles of transformer components.',paragraphs:[
 'Attention combines values using weights derived from queries and keys. Think of a query as the current position asking what information is relevant, keys as matching descriptors, and values as the information to combine. These are learned numerical projections, not separate search strings. Dot products score matches; scaled dot-product attention divides by the square root of key dimension before normalizing scores with softmax.',
-'In the lab, a query has three scores: one, two, and four. The current position is the second, so a causal mask excludes the third position. With that mask, the allowed weights are approximately zero point two six nine and zero point seven three one, and the future weight is zero. Remove the mask and the future position receives most of the mass. Such access would leak the answer during next-token training.',
+'In the lab, a query has raw dot-product scores one, two, and four, with key dimension two. Scaling by one over the square root of two gives approximately zero point seven zero seven, one point four one four, and two point eight two eight. The current position is the second, so a causal mask excludes the third position; the allowed weights are approximately zero point three three zero and zero point six seven zero, and the future weight is zero. Remove the mask and the future position receives about zero point seven three four of the mass. Such access would leak the answer during next-token training.',
 'A transformer block also includes positionwise feed-forward computation, residual connections, and normalization. Attention moves information between allowed positions; the feed-forward sublayer transforms each representation. Residual paths add an input back to a transformation, helping information and gradients move through depth. Normalization controls activation statistics. These responsibilities are distinct even when optimized implementations fuse several operations.',
 'Attention alone does not provide the desired ordering rule. Position information can be encoded with added position vectors or incorporated through mechanisms such as relative or rotary relationships. Multiple attention heads learn different projections, but a head is not guaranteed to correspond to one interpretable linguistic concept. Inspect the actual masks, dimensions, and objective rather than inferring a model’s behavior from a diagram label.',
 'Encoder models often combine both left and right context for representation tasks. Decoder-only language models use causal attention for autoregressive generation. Encoder-decoder models encode an input and let a decoder attend to that representation while generating an output. These are architectural patterns, not rankings of intelligence. Their objectives, data, and evaluation determine which application comparisons are meaningful.',
@@ -270,6 +270,137 @@ lessons.push(
 'Finish with a maintenance plan and an honest completion record. In three days, repeat the architecture explanation without notes. In one week, repeat the diagnosis on a new example. Save unresolved questions and schedule targeted review. Marking this lesson reviewed records your self-assessment; it does not certify mastery or replace independent feedback. The full course materials are available, while continued practice determines how reliably you can apply them.'
 ],question:'Which final deliverable best supports a claim that the capstone works within its stated scope?',options:['One polished answer','A model name and parameter count','Runnable code, reproducible evaluation, failure demonstrations, and explicit limitations'],correct:2,explanation:'A working system needs evidence about its behavior, including boundaries and failures. A fluent example or model size alone cannot establish reliability.',prompt:'Deliver a five-minute oral defense, run the capstone suite, and write a release record covering data, model choices, runtime, evaluation, rollback, and one unresolved risk.',rubric:'Trace the full system; distinguish training from inference; defend provenance and split; compare a baseline; report metrics with denominators and assumptions; demonstrate refusal and interruption; explain cache invalidation and rollback; transfer the design to video plus speech; schedule recall.',recall:'Repeat the defense after three days and one week using a different application, then revisit the weakest explanation.'}
 );
+
+// Research-informed depth additions. These remain authored, deterministic text so
+// the audio plan and the browser transcript continue to use the same source.
+const curriculumExtensions = new Map([
+  [3,[
+    'A useful evaluation fixture makes leakage visible. Start with a clean held-out set and record its version, split rule, metric, denominator, and error categories. Then copy one training example into the held-out set and measure the same system again. If the score rises, the change is evidence that the test became easier through contamination, not evidence that the model improved.',
+    'Report slices as well as an aggregate: for example, answerable versus unanswerable requests, short versus long inputs, or two source groups. A calibration table can group predictions by confidence and compare average confidence with the fraction that is correct. Tiny authored slices teach the reporting structure; they cannot establish broad fairness or population calibration.'
+  ]],
+  [6,[
+    'Make the representation path inspectable. For the passage “red fox sleeps”, write a deliberately small vocabulary such as red, fox, sleeps, and an unknown marker. Show the token sequence, integer IDs, the input IDs shifted against next-token targets, and the embedding rows selected by those IDs. A boundary marker changes which prediction is scored at the start or end of a sequence.',
+    'Now split an unfamiliar word into subword pieces and compare it with an unknown-token strategy. The pieces are IDs chosen by a tokenizer vocabulary, not miniature meanings guaranteed to add up compositionally. Ask what happens when a space, punctuation mark, or end marker is retained. Reproducing these choices is part of reproducing a language-model experiment.'
+  ]],
+  [10,[
+    'Before a metric is trusted, write a fixture that can make it wrong. In the dataset lab, add an exact held-out duplicate of a training record and then add a near-duplicate sharing a long n-gram. Count both exact text overlap and the selected n-gram overlap, because a group identifier catches neither when the copied records have different source labels. Record the threshold and the text normalization rule with the result.'
+  ]],
+  [11,[
+    'A repaired split should report what it sacrificed. Cluster exact duplicates and flagged near duplicates before assigning groups, keep each cluster on one side, and then show the remaining counts by split and source group. If the independent test becomes too small, say so and collect more permitted examples instead of silently reusing the contaminated rows. Version the fixture and split manifest together.'
+  ]],
+  [12,[
+    'Use one fixed example to connect tokenization with training. If input IDs are [red, fox] and the target IDs are [fox, sleeps], the first position scores the probability of fox given red and the second scores sleeps given red fox. Padding positions receive no loss. This shift is easy to implement incorrectly and can make a training curve look healthy while teaching the wrong alignment.',
+    'Compare the count baseline with a tiny learned model using the same boundaries and held-out sentences. Report the tokenizer, vocabulary, unknown handling, and evaluation tokens beside each perplexity. A lower number is meaningful only when these protocols match; changing tokenization changes the units being averaged.'
+  ]],
+  [13,[
+    'Trace one decoder position with deliberately tiny shapes. The runnable fixture uses model width two, one attention head with head size two, and a sequence of three positions. Each Q, K, and V tensor has a sequence axis of three and the single head has shape three by two. At the second position, the causal mask leaves columns one and two available and forces column three to zero before softmax. The same reasoning extends to multiple heads and wider models.',
+    'After attention, add the returned value to the two-number residual stream, normalize that vector, and pass it through a positionwise multilayer perceptron before the next residual addition. A final linear projection maps the model-width state to one logit per vocabulary item. Write down one attention row and the fixture’s resulting logit vector. The shapes and the zeroed future entry are more useful evidence than a block diagram alone.',
+    'During teacher-forced training, all target prefixes are available as inputs but future target positions must remain masked. During generation, append one selected token and repeat the same forward contract. A missing mask can improve the training loss by giving away the answer, while the identical model fails when that future token does not yet exist.'
+  ]],
+  [16,[
+    'Keep three objectives separate in your comparison. Supervised fine-tuning assigns a target response and minimizes its token loss. Full fine-tuning changes selected base parameters. LoRA freezes those parameters and changes only a low-rank update. Preference optimization instead compares a chosen and rejected response under an explicit relative objective; the labels do not become a replacement for factual evaluation.',
+    'For the matrix lab, write the update as W prime equals W plus B A. A rank-one B A can fit the rank-one target, while a rank-one LoRA update leaves a residual for the full-rank target even if optimization converges. The separate full-fine-tuning fixture uses a closed-form fit to show a capacity baseline, not a matched-budget optimization experiment; it can reach zero error on this toy target. Record trainable entries, final error, and which parameters stayed frozen so the comparison remains inspectable.'
+  ]],
+  [17,[
+    'A reward-hacking fixture separates the proxy from the goal. Suppose a short answer is correct and supported, while a longer answer adds unsupported claims. If the proxy rewards length, the longer answer can win even though a support rubric scores it lower. Mark both scores, identify the mismatch, and add a regression case that rewards concise supported answers. A reward model or AI evaluator is another learned component with its own blind spots.',
+    'Distillation has a different contract: a student imitates teacher outputs or probability distributions. It can preserve a teacher shortcut or error. Compare the student’s independent support and refusal tests with imitation loss; do not conclude that matching a teacher proves correctness.'
+  ]],
+  [18,[
+    'Turn a serving estimate into a worksheet with explicit variables. Hold the model dimensions fixed while changing batch size, context length, and bytes per value. Recompute the KV cache for at least three rows, then label the output as an estimate. Separately record any local elapsed time as a toy measurement with its hardware, warm-up, and workload; the estimate and the measurement answer different questions.'
+  ]],
+  [19,[
+    'A useful comparison table keeps memory, throughput, and quality separate. Lower precision can reduce weight and cache bytes, but reconstruction error or changed token probabilities can affect output quality. Larger batches may improve utilization while increasing queue delay. Longer contexts can raise cache memory and prefill work. State which values are calculated, which are measured locally, and which are still unknown instead of collapsing them into one “performance” number.'
+  ]],
+  [20,[
+    'Compare retrieval methods on the same authored queries. Lexical overlap counts shared terms; a deterministic vector representation can compare a query with documents using a dot product or cosine similarity. Show both top-k rankings, then rerank candidates by evidence coverage. Keep the selected span, source version, and score components in the trace so a learner can explain why a source won and detect stale evidence.',
+    'Abstention is part of retrieval quality. If no candidate clears the authored support threshold, return no evidence and identify that reason. A semantically similar vector is not permission to invent a citation. Embedding retrieval can be offered as an optional bounded extension while the extractive lexical baseline remains the required capstone.'
+  ]],
+  [21,[
+    'A tool request needs a schema, an allowlist, and an approval boundary. Test a valid request, a malformed request, and a request embedded in untrusted retrieved text. The workflow should expose the rejection reason and leave external state unchanged. Structured output is a parsing contract; it does not grant permission to execute an action.',
+    'Trace the transition from question to retrieval, reranking, tool decision, and answer. Include request ID, source IDs, policy result, and failure category, while omitting unnecessary private text. This makes an agent workflow inspectable without turning the course into a live external service.'
+  ]],
+  [26,[
+    'Add contamination and calibration to the acceptance report. Deliberately copy one training item into the held-out fixture, compare the clean and contaminated score, then report confidence bins with count, mean confidence, and observed correctness. Include at least two error slices and their denominators. These small authored cases teach an evaluation format; they are not evidence of population-level fairness or reliability.',
+    'An adversarial case should name the expected decision: refuse an unsupported citation, flag a prompt injection in retrieved text, or escalate a malformed tool request. A passing aggregate can hide a severe failure, so release criteria should identify which individual cases block a change.'
+  ]],
+  [27,[
+    'Add a canary event to the release trace. Record the candidate artifact and source version, send a bounded share of fixture traffic through it, compare predefined support, refusal, latency, and accessibility checks, and roll back when a blocking threshold fails. The rollback record should name the previous artifact and cache identities to invalidate. A prompt instruction alone is not an execution boundary.',
+    'Keep estimates and measurements distinct in the trace. A calculated cache size, an offline toy timing, and a real local service latency each need their assumptions. This vocabulary helps an incident review distinguish a planning worksheet from evidence collected under load.'
+  ]],
+  [28,[
+    'The required capstone remains the bounded extractive assistant. Add an optional decision record with the question, source collection, ranking method, evidence threshold, refusal cases, and metrics that must remain stable. Track A may replace lexical ranking with deterministic embedding or reranked retrieval while preserving source spans, abstention, and the same evaluation cases. A local generative adapter is a separate future project requiring resource, safety, and evaluation decisions; it cannot silently replace this baseline.'
+  ]],
+  [29,[
+    'In the defense, compare the baseline with one optional Track A retrieval change and show a before-and-after trace. Include answerable, unsupported, ambiguous, hostile, and outdated-source cases. Explain which metric changed, which source span supports the result, and whether any regression blocks release. This is transfer practice within the current local scope; a generative tutor remains outside the implemented course.',
+    'Your maintenance record should list data and model versions, cache invalidation rules, canary thresholds, rollback artifact, accessibility checks, and the next recall date. A trustworthy system is supported by reproducible failures and recovery evidence, not by one fluent demonstration.'
+  ]]
+]);
+for (const [index, additions] of curriculumExtensions) lessons[index].paragraphs.push(...additions);
+
+// Lesson metadata makes prerequisites, workload, evidence, and success checks visible
+// to future interfaces without changing existing progress keys or lesson indices.
+const readingLinks = {
+  tokens:{label:'Goldberg Primer, 2015 (author PDF)',url:'https://arxiv.org/abs/1510.00726'},
+  vectors:{label:'Goldberg Primer, 2015 (author PDF)',url:'https://arxiv.org/abs/1510.00726'},
+  gradients:{label:'Nielsen, Neural Networks and Deep Learning, Chapter 2',url:'https://neuralnetworksanddeeplearning.com/chap2.html'},
+  network:{label:'Nielsen, Neural Networks and Deep Learning, Chapter 1',url:'https://neuralnetworksanddeeplearning.com/chap1.html'},
+  vsr:{label:'BasicVSR paper',url:'https://arxiv.org/abs/2012.02181'},
+  evaluation:{label:'Eisenstein, Introduction to NLP (author draft)',url:'https://cseweb.ucsd.edu/~nnakashole/teaching/eisenstein-nov18.pdf'},
+  generalization:{label:'Eisenstein, Introduction to NLP (author draft)',url:'https://cseweb.ucsd.edu/~nnakashole/teaching/eisenstein-nov18.pdf'},
+  dataset:{label:'Eisenstein, Introduction to NLP (author draft)',url:'https://cseweb.ucsd.edu/~nnakashole/teaching/eisenstein-nov18.pdf'},
+  leakage:{label:'Eisenstein, Introduction to NLP (author draft)',url:'https://cseweb.ucsd.edu/~nnakashole/teaching/eisenstein-nov18.pdf'},
+  lm:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  transformer:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  scale:{label:'Deep Learning, official contents',url:'https://www.deeplearningbook.org/contents/TOC.html'},
+  distributed:{label:'Stanford CS336 Spring 2025',url:'https://cs336.stanford.edu/spring2025/index.html'},
+  adaptation:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  feedback:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  decoding:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  serving:{label:'Natural Language Processing with Transformers, O’Reilly',url:'https://www.oreilly.com/library/view/natural-language-processing/9781098136789/'},
+  retrieval:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  speech:{label:'Speech and Language Processing, August 2024 draft',url:'https://web.stanford.edu/~jurafsky/slp3/old_aug24/ed3bookaug20_2024.pdf'},
+  'video-restoration':{label:'BasicVSR paper',url:'https://arxiv.org/abs/2012.02181'},
+  acceptance:{label:'Eisenstein, Introduction to NLP (author draft)',url:'https://cseweb.ucsd.edu/~nnakashole/teaching/eisenstein-nov18.pdf'}
+};
+const lessonMeta = [
+  ['orientation',0,8,'Course overview; no external reading required','Explain the model/application boundary'],
+  ['training',0,10,'Course overview; no external reading required','Reproduce one update and separate training from inference'],
+  ['tokens',0,10,'Goldberg Primer, 2015, Chapters 3–5','Trace tokens, context, and one decoding decision'],
+  ['evaluation',0,12,'Eisenstein, 2019, Chapters 16–19','Name a split, metric, denominator, and failure slice'],
+  ['vsr',0,10,'BasicVSR paper (optional)','Separate sharpness, fidelity, and temporal consistency'],
+  ['system',0,12,'Course references','Trace inputs, state, evidence, and failure boundaries'],
+  ['vectors',0,15,'Goldberg Primer, 2015, Chapters 2–6','Inspect IDs, shapes, and an embedding lookup'],
+  ['gradients',6,15,'Nielsen, Chapters 2–4','Check a gradient with a finite difference'],
+  ['network',7,20,'Nielsen, Chapters 2–5','Compare train and held-out behavior'],
+  ['generalization',8,15,'Eisenstein, Chapters 16–19','Diagnose data versus capacity with a baseline'],
+  ['dataset',3,15,'Eisenstein, Chapters 17–18','Write a reproducible dataset card'],
+  ['leakage',10,15,'Eisenstein, Chapters 18–19','Remove group, exact, and n-gram overlap'],
+  ['lm',11,20,'Jurafsky & Martin, 2024 draft, Chapters 7–8','Align input IDs and next-token targets'],
+  ['transformer',12,25,'Jurafsky & Martin, 2024 draft, Chapter 7','Reproduce one masked attention row'],
+  ['scale',13,20,'Goodfellow et al., Chapters 8–12','Build an explicit memory budget'],
+  ['distributed',14,20,'Stanford CS336 notes','Recover optimizer state and compare runs'],
+  ['adaptation',13,20,'Jurafsky & Martin, 2024 draft, Chapter 8','Compare SFT, LoRA, and preference objectives'],
+  ['feedback',16,20,'Jurafsky & Martin, 2024 draft, Chapter 8','Identify proxy failure and independent tests'],
+  ['decoding',16,20,'Jurafsky & Martin, 2024 draft, Chapter 7','Separate queue, prefill, decoding, and playback'],
+  ['serving',18,20,'NLP with Transformers, Chapters 2–4','Label estimates, measurements, and quality tradeoffs'],
+  ['retrieval',18,20,'Jurafsky & Martin, 2024 draft, Chapter 11','Compare rankings and justify abstention'],
+  ['tools',20,20,'Course references','Trace schema validation and permission boundaries'],
+  ['speech',21,15,'Jurafsky & Martin, 2024 draft, Chapters 15–17','Compute an audio metric with assumptions'],
+  ['tts',22,15,'Course narration guide','Separate synthesis, playback, and interruption'],
+  ['multimodal',23,15,'Course references','Name evidence and failure modes across modalities'],
+  ['video-restoration',24,15,'BasicVSR paper (optional)','Separate alignment, fidelity, and temporal consistency'],
+  ['acceptance',25,20,'Eisenstein, Chapters 16–19','Report contamination, slices, and calibration'],
+  ['observability',26,20,'Course references','Trace a canary failure and rollback'],
+  ['capstone',20,30,'Course research recommendations','Submit source spans, refusal cases, and a decision record'],
+  ['defense',28,30,'Course research recommendations','Defend mechanisms, evidence, runtime, and maintenance']
+].map(([id, prerequisite, minutes, reading, success]) => ({id, prerequisiteLessons: prerequisite === 0 ? [] : [prerequisite], estimatedMinutes: minutes, reading: readingLinks[id]??reading, evidenceTier: 'authored lesson plus deterministic offline fixture', successCheck: success}));
+lessons.forEach((lesson,index) => { lesson.metadata = lessonMeta[index]; });
+lessons[0].recall = 'After three days, explain the model/application boundary using a document assistant. After one week, name one state change and one evidence check.';
+lessons[1].recall = 'After three days, reproduce the one-parameter update. After one week, explain why inference with fixed weights does not train.';
+lessons[2].recall = 'After three days, tokenize a new short phrase and separate context from learned parameters. After one week, explain why decoding does not verify facts.';
+lessons[3].recall = 'After three days, design a clean split and metric. After one week, identify how contamination or a missing subgroup could change a conclusion.';
+lessons[4].recall = 'After three days, distinguish resizing from restoration. After one week, name a temporal consistency failure.';
+lessons[5].recall = 'After three days, trace a complete system. After one week, identify which component you would test for a new failure.';
 
 // Equations sit after the related paragraph; spoken versions define the notation.
 const equationCards=[

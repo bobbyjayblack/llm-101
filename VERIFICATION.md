@@ -132,3 +132,20 @@ Checked on 2026-09-06 after adding start.bat, stop.bat, and service.ps1:
 - No browser console errors were observed during the interaction checks.
 
 Remaining validation: learner feedback on magnification, contrast, voice quality, listening pace, and lesson depth; broader viewport and browser testing; sustained narration and passage transitions; export download interaction. The course intentionally labels progress as self-reviewed rather than AI-assessed mastery.
+
+## University LLM course research documentation
+
+Verified on 2026-09-07 after adding `research/university-llm-courses/`:
+
+- The final research catalog contains six primary course dossiers and five additional dated comparison offerings. Each primary class has professor(s), course number/code, term, official syllabus/schedule links, book status, and separate student-course versus instructor-feedback limits.
+- Twelve book dossiers cover every book explicitly listed as useful, recommended, or optional in the six primary offerings. The exact CS224N-linked 2015 Goldberg *Primer* is separate from the unassigned 2017 *Neural Network Methods* publication. Book files identify whether chapter review used full text, preview/companion material, or TOC/abstract evidence.
+- A local Markdown-link sweep over all research Markdown files passed with no missing relative links. `npm.cmd test` passed: 20 tests, 0 failures.
+- No runtime, lesson, lab, interface, server, audio, or learner-data files were changed by this research pass. No GPU, browser speech, timing, or audio-smoke checks were run because the changes are documentation-only; prior runtime measurements above retain their original scope.
+
+## Research-informed curriculum update
+
+Updated on 2026-09-08. The 30 lessons now include authored walkthroughs for token IDs and subwords, embedding lookup, next-token alignment, causal decoder shapes, raw and `1/sqrt(d_k)` scaled scores, masking, objective comparisons, the full-fit capacity baseline, reward hacking, retrieval ranking and abstention with source-snapshot eligibility, serving worksheets, contamination and calibration, adversarial decisions, and canary rollback. Every lesson carries optional prerequisite, time, reading, evidence-tier, and success-check metadata; 21 external readings use the shared `{label, url}` contract and the original six lessons now have authored recall prompts. The required capstone remains a bounded extractive assistant; fixed-vector retrieval is an optional Track A extension and a local generative adapter remains future work.
+
+The shared labs and interface were updated in parallel to expose deterministic tokenization/decoder traces, contamination and calibration fields, objective and reward-hacking fields, serving worksheet rows, lexical/vector/reranked retrieval with snapshot eligibility and freshness tie-breaks, and adversarial/canary/rollback traces. `node --check course.js`, `node --check labs.js`, `node --check app.js`, and `npm.cmd test` passed (28 tests, 0 failures) after the content and fixture changes. Direct Node smoke calls covered both scenarios for units 4, 5, 7, 8, 9, 12, and 13. The final `npm.cmd run test:browser` passed after the lab math and retrieval fixes: real local playback, pause/resume/stop, highlighting, settings, fallback, all 30 lessons, 26 lab scenarios, quiz feedback, navigation, persistence, responsive layout, and the lesson-guide, authored-recall, decoder-trace, evidence-note, and structured-output assertions. Real narration, audio timing, and backend speech checks were not rerun in this content/fixture pass; the expanded text invalidates cached narration through the existing content-plan hash, and full course audio readiness remains separate from service readiness.
+
+The final documentation sweep passed for all 32 repository Markdown files and 69 relative links, with no missing targets; `git diff --check` also passed. No generated audio, model files, learner exports, credentials, or dependency directories were added.
